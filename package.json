@@ -1,0 +1,36 @@
+{
+    "name": "hypergap-tools",
+    "displayName": "Hypergap Tools",
+    "description": "Tools for developing games for the Hypertext Gaming Platform",
+    "version": "0.0.1",
+    "publisher": "ArcadioGarcia",
+    "engines": {
+        "vscode": "^1.0.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.createProject",
+        "onCommand:extension.generatePackage"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.createProject",
+                "title": "Create Hypergap project"
+            },
+            {
+                "command": "extension.generatePackage",
+                "title": "Generate HyperGap package"
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "vscode": "^0.11.0"
+    }
+}
