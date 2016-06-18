@@ -1,36 +1,45 @@
 {
-    "name": "hypergap-tools",
-    "displayName": "Hypergap Tools",
-    "description": "Tools for developing games for the Hypertext Gaming Platform",
-    "version": "0.0.1",
-    "publisher": "ArcadioGarcia",
-    "engines": {
-        "vscode": "^1.0.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onCommand:extension.createProject",
-        "onCommand:extension.generatePackage"
-    ],
-    "main": "./extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.createProject",
-                "title": "Create Hypergap project"
-            },
-            {
-                "command": "extension.generatePackage",
-                "title": "Generate HyperGap package"
-            }
-        ]
-    },
-    "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install"
-    },
-    "devDependencies": {
-        "vscode": "^0.11.0"
-    }
+  "name": "hypergap-tools",
+  "displayName": "Hypergap Tools",
+  "description": "Tools for developing games for the Hypertext Gaming Platform",
+  "version": "0.0.1",
+  "publisher": "ArcadioGarcia",
+  "engines": {
+    "vscode": "^1.0.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.createProject",
+    "onCommand:extension.generatePackage",
+    "onCommand:extension.deployPackage"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.createProject",
+        "title": "Create Hypergap project"
+      },
+      {
+        "command": "extension.generatePackage",
+        "title": "Generate HyperGap package"
+      },
+      {
+        "command": "extension.deployPackage",
+        "title": "Deploy HyperGap package"
+      }
+    ]
+  },
+  "scripts": {
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "vscode": "^0.11.0"
+  },
+  "dependencies": {
+    "jszip": "^3.0.0",
+    "opn": "^4.0.2"
+  }
 }
