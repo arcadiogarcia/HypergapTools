@@ -61,32 +61,30 @@ function activate(context) {
 
     var disposable2 = vscode.commands.registerCommand('extension.generatePackage', function generatePackage() {
         // The code you place here will be executed every time your command is executed
-        try{
-            var manifest = require(vscode.workspace.rootPath+'/manifest.json');
-        }catch(e){
-            vscode.window.showErrorMessage("There is no HyperGap project in this folder! (manifest.json is missing)");
-            return;
-        }
-        if(manifest){
+        var manifest = readManifest();
+        if (manifest != null) {
             generatePackage(manifest);
             vscode.window.showInformationMessage('Package generated!');
             return true;
-        }else{
-            vscode.window.showErrorMessage("There is no HyperGap project in this folder! (manifest.json is missing)");
-            vscode.window.showErrorMessage("If you want to create a new HyperGap game, run 'Create HyperGap project'");
         }
     });
 
     var disposable2 = vscode.commands.registerCommand('extension.deployPackage', function () {
         // The code you place here will be executed every time your command is executed
-        if(generatePackage){
-            const opn = require('opn');
-            opn('http://bing.com');
+        var manifest = readManifest();
+        if (manifest != null) {
+            var packagePath = generatePackage(manifest);
+            if (packagePath!==false) {
+                createDeployServer(packagePath,function (url) {
+                    const opn = require('opn');
+                    opn("com.hypergap.deploy://"+url);
+                });
+            }
         }
     });
 
 
-    function generatePackage(manifest){
+    function generatePackage(manifest) {
         switch (os.type()) {
             case "Windows_NT":
                 var results = [];
@@ -98,20 +96,53 @@ function activate(context) {
                 child.stderr.on("data", function (data) {
                     console.log(data.toString());
                 });
-                child.stdin.write('mkdir "'+vscode.workspace.rootPath+'\\HypergapPackageTemp" \n');
-                child.stdin.write('Copy-Item '+vscode.workspace.rootPath+'/manifest.json '+vscode.workspace.rootPath+'/HypergapPackageTemp \n');
-                child.stdin.write('Copy-Item '+vscode.workspace.rootPath+'/'+manifest.scope+' '+vscode.workspace.rootPath+'/HypergapPackageTemp -Recurse\n');
+                child.stdin.write('mkdir "' + vscode.workspace.rootPath + '\\HypergapPackageTemp" \n');
+                child.stdin.write('Copy-Item ' + vscode.workspace.rootPath + '/manifest.json ' + vscode.workspace.rootPath + '/HypergapPackageTemp \n');
+                child.stdin.write('Copy-Item ' + vscode.workspace.rootPath + '/' + manifest.scope + ' ' + vscode.workspace.rootPath + '/HypergapPackageTemp -Recurse\n');
                 child.stdin.write('Add-Type -A System.IO.Compression.FileSystem\n');
-                child.stdin.write('Remove-Item "'+vscode.workspace.rootPath+'\\'+ manifest.name+'.hgp" \n');
-                child.stdin.write("[IO.Compression.ZipFile]::CreateFromDirectory('"+vscode.workspace.rootPath+"/HypergapPackageTemp', '"+vscode.workspace.rootPath+"/"+manifest.name+".hgp')\n");
-                child.stdin.write('Remove-Item "'+vscode.workspace.rootPath+'\\HypergapPackageTemp"-recurse\n');
+                child.stdin.write('Remove-Item "' + vscode.workspace.rootPath + '\\' + manifest.name + '.hgp" \n');
+                child.stdin.write("[IO.Compression.ZipFile]::CreateFromDirectory('" + vscode.workspace.rootPath + "/HypergapPackageTemp', '" + vscode.workspace.rootPath + "/" + manifest.name + ".hgp')\n");
+                child.stdin.write('Remove-Item "' + vscode.workspace.rootPath + '\\HypergapPackageTemp"-recurse\n');
                 child.stdin.end();
-                break;
+                return vscode.workspace.rootPath + "/" + manifest.name + ".hgp";
             default:
                 vscode.window.showErrorMessage("This OS is not supported");
-                break;
+                return false;
         }
     }
+
+    function readManifest() {
+        try {
+            var manifest = require(vscode.workspace.rootPath + '/manifest.json');
+        } catch (e) {
+            vscode.window.showErrorMessage("There is no HyperGap project in this folder! (manifest.json is missing)");
+            vscode.window.showErrorMessage("If you want to create a new HyperGap game, run 'Create HyperGap project'");
+            return null;
+        }
+        return manifest;
+    }
+
+    var createDeployServer = (function () {
+        var app = null;
+        var server = null;
+        var express = require('express');
+        return function (file, callback) {
+            if (server != null) {
+                server.close();
+            }
+            app = express();
+
+            app.get('/', function (req, res) {
+                res.sendFile(file);
+            });
+
+            server = app.listen(3000, function () {
+                callback("localhost:3000");
+            });
+
+        }
+    })();
+
 
     context.subscriptions.push(disposable1);
     context.subscriptions.push(disposable2);
@@ -122,3 +153,5 @@ exports.activate = activate;
 function deactivate() {
 }
 exports.deactivate = deactivate;
+
+
