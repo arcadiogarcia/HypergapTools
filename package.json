@@ -13,7 +13,8 @@
   "activationEvents": [
     "onCommand:extension.createProject",
     "onCommand:extension.generatePackage",
-    "onCommand:extension.deployPackage"
+    "onCommand:extension.deployPackage",
+    "onCommand:extension.openLevelEditor"
   ],
   "main": "./extension",
   "contributes": {
@@ -21,6 +22,10 @@
       {
         "command": "extension.createProject",
         "title": "Create Hypergap project"
+      },
+      {
+        "command": "extension.openLevelEditor",
+        "title": "Open HyperGap level editor"
       },
       {
         "command": "extension.generatePackage",
@@ -33,7 +38,8 @@
     ]
   },
   "scripts": {
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "package-electron": "cd electronApp && electron-packager .  --platform=win32 --arch=ia32"
   },
   "devDependencies": {
     "vscode": "^0.11.0"

@@ -1,0 +1,16 @@
+body{
+    background: #111;
+}
+
+.menu{
+    background: #222;
+    border: #333 1px solid;
+}
+
+#handle {
+            width: 0;
+            height: 0;
+            border-right: 20px solid transparent;
+            border-top: 20px solid black;
+            cursor: move;
+        }

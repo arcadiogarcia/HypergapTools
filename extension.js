@@ -6,6 +6,8 @@ var path = require('path');
 var newProject = require('./newProject.js');
 var os = require('os');
 var spawn = require('child_process').spawn;
+const exec = require('child_process').exec;
+var serverPort=3000;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -59,7 +61,7 @@ function activate(context) {
         vscode.window.showInformationMessage('Project created!');
     });
 
-    var disposable2 = vscode.commands.registerCommand('extension.generatePackage', function generatePackage() {
+    var disposable2 = vscode.commands.registerCommand('extension.generatePackage', function () {
         // The code you place here will be executed every time your command is executed
         var manifest = readManifest();
         if (manifest != null) {
@@ -69,18 +71,23 @@ function activate(context) {
         }
     });
 
-    var disposable2 = vscode.commands.registerCommand('extension.deployPackage', function () {
+    var disposable3 = vscode.commands.registerCommand('extension.deployPackage', function () {
         // The code you place here will be executed every time your command is executed
         var manifest = readManifest();
         if (manifest != null) {
             var packagePath = generatePackage(manifest);
-            if (packagePath!==false) {
-                createDeployServer(packagePath,function (url) {
-                    const opn = require('opn');
-                    opn("com.hypergap.deploy://"+url);
-                });
+            if (packagePath !== false) {
+                setDeployPackage(packagePath);
+                const opn = require('opn');
+                opn("com.hypergap.deploy://" + "localhost:"+serverPort+"/deployPackage");
             }
         }
+    });
+
+    var disposable4 = vscode.commands.registerCommand('extension.openLevelEditor', function () {
+        // The code you place here will be executed every time your command is executed
+        var thisExtension=vscode.extensions.getExtension('ArcadioGarcia.hypergap-tools');
+        var child = spawn(thisExtension.extensionPath+"/electronApp/hypergaptools-electron-component-win32-ia32/hypergaptools-electron-component.exe");
     });
 
 
@@ -122,30 +129,34 @@ function activate(context) {
         return manifest;
     }
 
-    var createDeployServer = (function () {
+    var localServer = (function () {
         var app = null;
         var server = null;
+        var file = null;
         var express = require('express');
-        return function (file, callback) {
-            if (server != null) {
-                server.close();
+        if (server != null) {
+            server.close();
+        }
+        app = express();
+
+        app.get('/deployPackage', function (req, res) {
+            res.sendFile(file);
+        });
+
+        server = app.listen(serverPort, function () {
+
+        });
+        return {
+            setDeployPackage:function (someFile) {
+                file = someFile;
             }
-            app = express();
-
-            app.get('/', function (req, res) {
-                res.sendFile(file);
-            });
-
-            server = app.listen(3000, function () {
-                callback("localhost:3000");
-            });
-
         }
     })();
 
-
     context.subscriptions.push(disposable1);
     context.subscriptions.push(disposable2);
+    context.subscriptions.push(disposable3);
+    context.subscriptions.push(disposable4);
 }
 exports.activate = activate;
 
