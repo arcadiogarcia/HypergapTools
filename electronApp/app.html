@@ -2,58 +2,27 @@
 
 <head>
     <link rel="stylesheet" type="text/css" href="style.css" />
+	<script src="js/toolbar.js"></script>
 </head>
 
 <body>
-    <div id="menu" class="menu" style="position:absolute;width:100px;height:400px;left:50px;top:50px;">
-        <div id="handle" class="handle">
-        </div>
-    </div>
+
 
     <script>
-        	function startDrag(e) {
-				// determine event object
-				if (!e) {
-					var e = window.event;
-				}
-
-				// IE uses srcElement, others use target
-				var targ = e.target ? e.target : e.srcElement;
-
-				if (targ.className != 'handle') {return};
-				// calculate event X, Y coordinates
-					offsetX = e.clientX;
-					offsetY = e.clientY;
-                    
-                targ=document.getElementById("menu");
-
-				// calculate integer values for top and left 
-				// properties
-				coordX = parseInt(targ.style.left);
-				coordY = parseInt(targ.style.top);
-				drag = true;
-
-				// move div element
-					document.onmousemove=dragDiv;
-				
-			}
-			function dragDiv(e) {
-				if (!drag) {return};
-				if (!e) { var e= window.event};
-				var targ=document.getElementById("menu");
-				// move div element
-				targ.style.left=coordX+e.clientX-offsetX+'px';
-				targ.style.top=coordY+e.clientY-offsetY+'px';
-				return false;
-			}
-			function stopDrag() {
-				drag=false;
-			}
-			window.onload = function() {
-				document.onmousedown = startDrag;
-				document.onmouseup = stopDrag;
-			}
-            </script>
+		var windows=[
+			{children:[
+				{type:"button", text:"New", enabled:true},
+				{type:"button", text:"Copy", enabled:false},
+				{type:"button", text:"Delete", enabled:false}
+			]},
+			{children:[
+				{type:"button", text:"New", enabled:true}
+			]}
+		];
+		window.onload = function() {
+			var toolbars=Toolbar(windows);
+		}
+</script>
 </body>
 
 </html>
