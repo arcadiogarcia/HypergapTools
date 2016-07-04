@@ -14,7 +14,7 @@ button{
     border: #333 1px solid;
     padding:0px;
     position:absolute;
-    width:100px;
+    min-width:100px;
     left:50px;
     top:50px;
     overflow: hidden;
@@ -22,7 +22,7 @@ button{
 
 .handle {
     margin:0px;
-            width: 80px;
+            width: calc( 100% - 20px );
             height: 20px;
             display:block;
             background-color: #444;
@@ -86,4 +86,14 @@ button{
    .menu .disabled:active{
      background: #252525;
      border: 1px red dashed;
+ }
+
+ .menu .label {
+     color:white;
+     margin:10px;
+ }
+
+ .menu select{
+     margin:10px;
+     width: calc( 100% - 20px );
  }

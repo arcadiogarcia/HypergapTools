@@ -7,6 +7,8 @@ var newProject = require('./newProject.js');
 var os = require('os');
 var spawn = require('child_process').spawn;
 const exec = require('child_process').exec;
+var xml2js = require('xml2js');
+var xmlparser = new xml2js.Parser();
 var serverPort=3000;
 
 // this method is called when your extension is activated
@@ -77,7 +79,7 @@ function activate(context) {
         if (manifest != null) {
             var packagePath = generatePackage(manifest);
             if (packagePath !== false) {
-                setDeployPackage(packagePath);
+                localServer.setDeployPackage(packagePath);
                 const opn = require('opn');
                 opn("com.hypergap.deploy://" + "localhost:"+serverPort+"/deployPackage");
             }
@@ -134,18 +136,40 @@ function activate(context) {
         var server = null;
         var file = null;
         var express = require('express');
-        if (server != null) {
-            server.close();
-        }
+
         app = express();
+        var server = require('http').Server(app);
 
         app.get('/deployPackage', function (req, res) {
             res.sendFile(file);
         });
 
-        server = app.listen(serverPort, function () {
+        server.listen(serverPort);
 
+        var io = require('socket.io')(server);
+
+        io.on('connection', function (socket) {
+            socket.on('get', function (data) {
+                switch(data.content){
+                    case "levelFiles":
+                        var manifest=readManifest();
+                    	socket.emit('reply', { id:data.id, payload:manifest.levels});
+                    break;
+                    case "levels":
+                        var manifest=readManifest();
+                        fs.readFile(vscode.workspace.rootPath + '/'+manifest.scope+ '/'+data.file, function(err, xmldata) {
+                            xmlparser.parseString(xmldata, function (err, result) {
+                                socket.emit('reply', { id:data.id, payload:result.levels.level.map(function(x){return x.$.id})});
+                            });
+                        });
+                    	
+                    break;
+                    default:
+                        console.log(data.content)
+                }
+            });
         });
+
         return {
             setDeployPackage:function (someFile) {
                 file = someFile;

@@ -1,26 +1,58 @@
 <html>
 
 <head>
-    <link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+	<script src="js/vscodeConnection.js"></script>
 	<script src="js/toolbar.js"></script>
 </head>
 
 <body>
 
 
-    <script>
+	<script>
+		var workspace={};
+		var toolbars;
+
 		var windows=[
+			{children:[
+				{type:"label","text":"Select level file:"},
+				{type:"select", id:"levelFiles",options:[
+					{text:"---",value:null}
+				], onchange:function(x){
+					workspace.levelFile=x;
+					vscodeConnection.getLevels(x,function(levels){
+						var options=levels.map(function(x){
+							return {text:x, value:x};
+						})
+						toolbars.setSelectOptions("levelSelect",options);
+					});
+				}},
+				{type:"label","text":"Select level:"},
+				{type:"select", id:"levelSelect",options:[
+					{text:"---",value:null}
+				], onchange:function(x){
+					alert(x);
+				}}
+			]},
 			{children:[
 				{type:"button", text:"New", enabled:true},
 				{type:"button", text:"Copy", enabled:false},
 				{type:"button", text:"Delete", enabled:false}
-			]},
-			{children:[
-				{type:"button", text:"New", enabled:true}
 			]}
 		];
 		window.onload = function() {
-			var toolbars=Toolbar(windows);
+			toolbars=Toolbar(windows);
+			vscodeConnection.getLevelFiles(function(levels){
+				var options=[
+					{text:"---",value:null},
+					{text:"Create new file",value:"#NewFile"},
+				];
+				levels.forEach(function(x){
+					options.push({text:x, value:x});
+				})
+				toolbars.setSelectOptions("levelFiles",options);
+			});
 		}
 </script>
 </body>

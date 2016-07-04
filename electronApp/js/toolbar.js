@@ -20,18 +20,37 @@ var Toolbar=(function (toolbars){
                 toolbar.appendChild(minimize);
 
                 t.children.forEach(function(c,j){
-                    var children= document.createElement('div');
-                    children.id = 'children'+i+"_"+j;
+                    var child= document.createElement('div');
+                    child.id = 'children'+i+"_"+j;
                     switch(c.type){
                         case "button":
-                            children.className = 'button';
-                            children.innerHTML=c.text;
+                            child.className = 'button';
+                            child.innerHTML=c.text;
                             if(c.enabled==false){
-                                children.className+=" disabled";
+                                child.className+=" disabled";
                             }
                         break;
+						case "label":
+                            child.className = 'label';
+							child.innerHTML=c.text;
+                        break;
+						case "select":
+                            child.className = 'select';
+							var select= document.createElement('select');
+                    		select.id = "select_"+c.id;
+							c.options.map(function(x){
+								 var o=document.createElement('option');
+								 o.text=x.text;
+								 o.value=x.value;
+								 return o;
+							}).forEach(function(x){
+								select.appendChild(x);
+							});
+							child.appendChild(select);
+							select.addEventListener("change", function(){c.onchange(select.value);}); 
+                        break;
                     }
-                    toolbar.appendChild(children);
+                    toolbar.appendChild(child);
                 })
             });
 			var selectedWindow;
@@ -91,5 +110,18 @@ var Toolbar=(function (toolbars){
 						});
 					});
 
-                    return {};
+                    return {
+						setSelectOptions:function(id, values){
+							var select= document.getElementById("select_"+id);
+							select.innerHTML="";
+							values.map(function(x){
+								 var o=document.createElement('option');
+								 o.text=x.text;
+								 o.value=x.value;
+								 return o;
+							}).forEach(function(x){
+								select.appendChild(x);
+							});
+						}
+					};
                 });
