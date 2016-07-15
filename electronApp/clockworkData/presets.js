@@ -26,6 +26,9 @@ var editorPresets = [
                         this.setVar("moving",false);
                         this.engine.execute_event("hideSelectBox");
                     }
+                    if(workspace.currentTool=="delete"){
+                        this.engine.deleteObjectLive(this);
+                    }
                 }
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==0){
                     if(this.getVar("moving")==true){
@@ -33,7 +36,11 @@ var editorPresets = [
                         this.setVar("#y",this.engine.getObject(event.object).getVar("#y")-this.getVar("my"));
                         this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
                     }else{
-                        this.engine.execute_event("showSelectBox",{type:"hover", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                        if(workspace.currentTool=="delete"){
+                            this.engine.execute_event("showSelectBox",{type:"delete", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")+1});
+                        }else{
+                            this.engine.execute_event("showSelectBox",{type:"hover", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                        }
                     }
                 }
             }
@@ -56,6 +63,13 @@ var editorPresets = [
                         this.setVar("$w",event.w);
                         this.setVar("$h",event.h);
                         this.setVar("#state", "hover");
+                    break;
+                   case "delete":
+                        this.setVar("#x",event.x|0);
+                        this.setVar("#y",event.y|0);
+                        this.setVar("$w",event.w);
+                        this.setVar("$h",event.h);
+                        this.setVar("#state", "delete");
                     break;
                     case "select":
                         this.setVar("#x",event.x|0);

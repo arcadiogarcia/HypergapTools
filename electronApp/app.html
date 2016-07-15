@@ -55,7 +55,7 @@
 							engineInstance.loadLevelByID("emptyLevel");
 							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
 								level.forEach(function(object){
-									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z, false,false,{spritesheet:object.spritesheet});
+									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{spritesheet:object.spritesheet});
 								})
 							});
 						break;
@@ -104,7 +104,9 @@
 			{children:[
 				{type:"button", text:"New", id:"New", enabled:true},
 				{type:"button", text:"Copy", id:"Copy", enabled:false},
-				{type:"button", text:"Delete", id:"Delete", enabled:false},
+				{type:"button", text:"Delete", id:"Delete", enabled:false,onclick:function(){
+					workspace.currentTool="delete";
+				}},
 				{type:"button", text:"Move", id:"Move", enabled:false, onclick:function(){
 					workspace.currentTool="move";
 				}}
