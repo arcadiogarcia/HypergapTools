@@ -25,10 +25,12 @@ var Toolbar=(function (toolbars){
                     switch(c.type){
                         case "button":
                             child.className = 'button';
+							child.id = "button_"+c.id;
                             child.innerHTML=c.text;
                             if(c.enabled==false){
                                 child.className+=" disabled";
                             }
+							child.addEventListener("click", function(){c.onclick();}); 
                         break;
 						case "label":
                             child.className = 'label';
@@ -122,6 +124,14 @@ var Toolbar=(function (toolbars){
 							}).forEach(function(x){
 								select.appendChild(x);
 							});
+						},
+						toggleButton:function(id, value){
+							var child= document.getElementById("button_"+id);
+							if(value){
+								child.classList.remove("disabled");
+							}else{
+								child.className+=" disabled";
+							}
 						}
 					};
                 });

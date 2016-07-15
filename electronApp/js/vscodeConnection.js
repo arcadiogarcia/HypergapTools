@@ -27,11 +27,20 @@ var vscodeConnection=(function(){
         pendingRequests.resolve(data);
     });
     return {
+        getScope:function(callback){
+            socket.emit('get', { content: 'scope', id: pendingRequests.newId(callback) });          
+        },
+        getSpritesheets:function(callback){
+            socket.emit('get', { content: 'spritesheets', id: pendingRequests.newId(callback) });          
+        },
         getLevelFiles:function(callback){
             socket.emit('get', { content: 'levelFiles', id: pendingRequests.newId(callback) });          
         },
         getLevels:function(file,callback){
             socket.emit('get', { content: 'levels', file:file, id: pendingRequests.newId(callback) });          
+        },
+        getLevelContent:function(file,level,callback){
+            socket.emit('get', { content: 'levelContent', file:file,level:level, id: pendingRequests.newId(callback) });          
         }
     }
 })();

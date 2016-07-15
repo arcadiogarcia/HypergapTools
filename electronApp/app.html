@@ -5,55 +5,157 @@
 	<script src="http://localhost:3000/socket.io/socket.io.js"></script>
 	<script src="js/vscodeConnection.js"></script>
 	<script src="js/toolbar.js"></script>
+	<script src="js/spritesheet.js"></script>
+	<script src="js/clockwork.js"></script>
+	<script src="js/pointsAndBoxes.js"></script>
+	<script src="clockworkData/presets.js"></script>
+	<script src="clockworkData/basicMouse.js"></script>
 </head>
 
 <body>
 
-
+	<canvas id="canvas" style="position:absolute;top:0px;left:0px;width:100%;height:100%;"></canvas>
 	<script>
-		var workspace={};
+		var CLOCKWORKCONFIG={};
+		var workspace=(function(){
+			var workspace={};
+			return {
+				setLevel:function(x){
+					var validLevel = x!="#---" && x!="#New";
+					["Save","Undo","Redo","New","Copy","Delete","Move"].forEach(function(x){toolbars.toggleButton(x,validLevel)});
+					workspace.level=x;
+				},
+				getLevel:function(){
+					return workspace.level;
+				},
+				setLevelFile:function(x){
+					workspace.levelFile=x;
+				},
+				getLevelFile:function(){
+					return workspace.levelFile;
+				}
+			}
+		})();
 		var toolbars;
+		var engineInstance;
+		var canvasAnimation;
 
+
+		function levelSelectChange(x){
+					workspace.setLevel(x);
+					switch(x){
+						case "#New":
+							engineInstance.loadLevelByID("emptyLevel");
+							return;
+						break;
+						case "#---":
+							engineInstance.loadLevelByID("emptyLevel");
+						break;
+						default:
+							engineInstance.loadLevelByID("emptyLevel");
+							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
+								level.forEach(function(object){
+									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z, false,false,{spritesheet:object.spritesheet});
+								})
+							});
+						break;
+					}
+		}
 		var windows=[
 			{children:[
 				{type:"label","text":"Select level file:"},
 				{type:"select", id:"levelFiles",options:[
-					{text:"---",value:null}
+					{text:"---",value:"#---"}
 				], onchange:function(x){
-					workspace.levelFile=x;
-					vscodeConnection.getLevels(x,function(levels){
-						var options=levels.map(function(x){
-							return {text:x, value:x};
-						})
-						toolbars.setSelectOptions("levelSelect",options);
-					});
+					workspace.setLevelFile(x);
+					switch(x){
+						case "#New":
+							toolbars.setSelectOptions("levelSelect",[{text:"---",value:"#---"}]);
+							toolbars.showDialog({type:"prompt",text:"Please introduce a name for the level"}, function(result){
+
+							});
+						break;
+						case "#---":
+							toolbars.setSelectOptions("levelSelect",[{text:"---",value:"#---"}]);
+						break;
+						default:
+							vscodeConnection.getLevels(x,function(levels){
+								var options=[
+									{text:"---",value:"#---"},
+									{text:"Create new level",value:"#New"},
+								];
+								levels.forEach(function(x){
+									options.push( {text:x, value:x});
+								})
+								toolbars.setSelectOptions("levelSelect",options);
+								levelSelectChange(options[0].value);
+							});
+						break;
+					}
 				}},
 				{type:"label","text":"Select level:"},
 				{type:"select", id:"levelSelect",options:[
-					{text:"---",value:null}
-				], onchange:function(x){
-					alert(x);
-				}}
+					{text:"---",value:"#---"}
+				], onchange:levelSelectChange},
+				{type:"button", text:"Save", id:"Save", enabled:false},
+				{type:"button", text:"Undo", id:"Undo", enabled:false},
+				{type:"button", text:"Redo", id:"Redo", enabled:false}
 			]},
 			{children:[
-				{type:"button", text:"New", enabled:true},
-				{type:"button", text:"Copy", enabled:false},
-				{type:"button", text:"Delete", enabled:false}
+				{type:"button", text:"New", id:"New", enabled:true},
+				{type:"button", text:"Copy", id:"Copy", enabled:false},
+				{type:"button", text:"Delete", id:"Delete", enabled:false},
+				{type:"button", text:"Move", id:"Move", enabled:false, onclick:function(){
+					workspace.currentTool="move";
+				}}
 			]}
 		];
+
+
 		window.onload = function() {
 			toolbars=Toolbar(windows);
 			vscodeConnection.getLevelFiles(function(levels){
 				var options=[
-					{text:"---",value:null},
-					{text:"Create new file",value:"#NewFile"},
+					{text:"---",value:"#---"},
+					{text:"Create new file",value:"#New"},
 				];
 				levels.forEach(function(x){
 					options.push({text:x, value:x});
 				})
 				toolbars.setSelectOptions("levelFiles",options);
 			});
+
+			vscodeConnection.getScope(function(scope){
+				workspace.scope=scope;
+				canvasAnimation.setRootFolder(scope);
+				vscodeConnection.getSpritesheets(function(spritesheets){
+					canvasAnimation.asyncLoadMultiple(spritesheets.map(function(x){
+						return scope+x;
+					}), function(){
+						//Success
+					})
+				});
+			});
+
+
+			canvasAnimation = new Spritesheet();
+			canvasAnimation.setUp(document.getElementById("canvas"), 30);
+			CLOCKWORKCONFIG.screenbuffer_width=800;
+			CLOCKWORKCONFIG.screenbuffer_height=400;
+			canvasAnimation.setBufferSize(800, 400);
+			canvasAnimation.asyncLoad("clockworkData/spritesheets.xml", callback_load);
+			function callback_load() {
+				engineInstance = new Clockwork();
+				engineInstance.setAnimationEngine(canvasAnimation);
+				engineInstance.registerCollision(ClockworkCollisions.pointsAndBoxes);
+				engineInstance.loadPresets(editorPresets);
+				engineInstance.loadPresets(basicClickPreset);
+				engineInstance.loadLevelsFromXML("clockworkData/levels.xml", function () {
+					engineInstance.start(30, document.getElementById("canvas"));
+				})  
+			}
 		}
+
 </script>
 </body>
 

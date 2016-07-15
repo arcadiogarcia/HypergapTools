@@ -148,9 +148,34 @@ function activate(context) {
 
         var io = require('socket.io')(server);
 
+
+        var HYPERGAP={};
+        var presetToSpritesheet={};
+        HYPERGAP.presets=[];
+        HYPERGAP.presets.push=function(x){
+            HYPERGAP.presets=HYPERGAP.presets.concat(x);
+        }
+        var manifest=readManifest();
+        manifest.presets.asyncForEach(function(x,cb){
+            fs.readFile(vscode.workspace.rootPath + "/" + manifest.scope + "/" + x, function(err, script) {
+                eval(script.toString());//I know, I know
+                cb();
+            });
+        }, function(){
+            HYPERGAP.presets.forEach(function(x){
+                presetToSpritesheet[x.name]=x.sprite;
+            })
+        });
+
+        
+
         io.on('connection', function (socket) {
             socket.on('get', function (data) {
                 switch(data.content){
+                    case "scope":
+                        var manifest=readManifest();
+                    	socket.emit('reply', { id:data.id, payload:vscode.workspace.rootPath + '/'+manifest.scope+ '/'});
+                    break;
                     case "levelFiles":
                         var manifest=readManifest();
                     	socket.emit('reply', { id:data.id, payload:manifest.levels});
@@ -161,8 +186,23 @@ function activate(context) {
                             xmlparser.parseString(xmldata, function (err, result) {
                                 socket.emit('reply', { id:data.id, payload:result.levels.level.map(function(x){return x.$.id})});
                             });
-                        });
-                    	
+                        });                    	
+                    break;
+                    case "levelContent":
+                        var manifest=readManifest();
+                        fs.readFile(vscode.workspace.rootPath + '/'+manifest.scope+ '/'+data.file, function(err, xmldata) {
+                            xmlparser.parseString(xmldata, function (err, result) {
+                                var levelContent=result.levels.level.filter(function(x){return x.$.id==data.level})[0].object.map(function(x){return x.$});
+                                socket.emit('reply', { id:data.id, payload:levelContent.map(function(x){
+                                    x.spritesheet=presetToSpritesheet[x.type];
+                                    return x;
+                                })});
+                            });
+                        });                    	
+                    break;
+                    case "spritesheets":
+                        var manifest=readManifest();
+                    	socket.emit('reply', { id:data.id, payload:manifest.spritesheets});                    	
                     break;
                     default:
                         console.log(data.content)
@@ -190,3 +230,15 @@ function deactivate() {
 exports.deactivate = deactivate;
 
 
+//Useful when you need to perform async operations on each of the elements of an array, but in strict order, and execute a callback at the end
+   Object.defineProperty(Array.prototype, 'asyncForEach', {
+            enumerable: false,
+            value: function (action, cb, index) {
+                var i = index || 0;
+                if (i >= this.length) {
+                    return cb();
+                }
+                var that = this;
+                return action(this[i], function () { that.asyncForEach(action, cb,i + 1); });
+            }
+        });
