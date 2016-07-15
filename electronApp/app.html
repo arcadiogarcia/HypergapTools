@@ -127,35 +127,50 @@
 				toolbars.setSelectOptions("levelFiles",options);
 			});
 
-			vscodeConnection.getScope(function(scope){
-				workspace.scope=scope;
-				canvasAnimation.setRootFolder(scope);
-				vscodeConnection.getSpritesheets(function(spritesheets){
-					canvasAnimation.asyncLoadMultiple(spritesheets.map(function(x){
-						return scope+x;
-					}), function(){
-						//Success
-					})
+
+
+			vscodeConnection.getGameConfig(function(config){
+				document.getElementById("canvas").width=config.width;
+				document.getElementById("canvas").height=config.height;
+				document.getElementById("canvas").style.width=config.width+"px";
+				document.getElementById("canvas").style.height=config.height+"px";
+				document.getElementById("canvas").style["left"]="50%";
+				document.getElementById("canvas").style["top"]="50%";
+				document.getElementById("canvas").style["margin-left"]=-config.width/2;
+				document.getElementById("canvas").style["margin-top"]=-config.height/2;
+
+
+				canvasAnimation = new Spritesheet();
+				canvasAnimation.setUp(document.getElementById("canvas"), config.animationfps);
+				CLOCKWORKCONFIG.screenbuffer_width=config.width;
+				CLOCKWORKCONFIG.screenbuffer_height=config.height;
+				canvasAnimation.setBufferSize(config.width, config.height);
+				vscodeConnection.getScope(function(scope){
+					workspace.scope=scope;
+					canvasAnimation.setRootFolder(scope);
+					vscodeConnection.getSpritesheets(function(spritesheets){
+						canvasAnimation.asyncLoadMultiple(spritesheets.map(function(x){
+							return scope+x;
+						}), function(){
+							//Success
+						})
+					});
 				});
+				canvasAnimation.asyncLoad("clockworkData/spritesheets.xml", callback_load);
+				
+				function callback_load() {
+					engineInstance = new Clockwork();
+					engineInstance.setAnimationEngine(canvasAnimation);
+					engineInstance.registerCollision(ClockworkCollisions.pointsAndBoxes);
+					engineInstance.loadPresets(editorPresets);
+					engineInstance.loadPresets(basicClickPreset);
+					engineInstance.loadLevelsFromXML("clockworkData/levels.xml", function () {
+						engineInstance.start(30, document.getElementById("canvas"));
+					})  
+				}
+				
 			});
 
-
-			canvasAnimation = new Spritesheet();
-			canvasAnimation.setUp(document.getElementById("canvas"), 30);
-			CLOCKWORKCONFIG.screenbuffer_width=800;
-			CLOCKWORKCONFIG.screenbuffer_height=400;
-			canvasAnimation.setBufferSize(800, 400);
-			canvasAnimation.asyncLoad("clockworkData/spritesheets.xml", callback_load);
-			function callback_load() {
-				engineInstance = new Clockwork();
-				engineInstance.setAnimationEngine(canvasAnimation);
-				engineInstance.registerCollision(ClockworkCollisions.pointsAndBoxes);
-				engineInstance.loadPresets(editorPresets);
-				engineInstance.loadPresets(basicClickPreset);
-				engineInstance.loadLevelsFromXML("clockworkData/levels.xml", function () {
-					engineInstance.start(30, document.getElementById("canvas"));
-				})  
-			}
 		}
 
 </script>

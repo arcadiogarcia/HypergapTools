@@ -176,6 +176,15 @@ function activate(context) {
                         var manifest=readManifest();
                     	socket.emit('reply', { id:data.id, payload:vscode.workspace.rootPath + '/'+manifest.scope+ '/'});
                     break;
+                    case "gameconfig":
+                        var manifest=readManifest();
+                    	socket.emit('reply', { id:data.id, payload:{
+                            width:manifest.screenResolution.w,
+                            height:manifest.screenResolution.h,
+                            enginefps:manifest.enginefps,
+                            animationfps:manifest.animationfps
+                        }});
+                    break;
                     case "levelFiles":
                         var manifest=readManifest();
                     	socket.emit('reply', { id:data.id, payload:manifest.levels});

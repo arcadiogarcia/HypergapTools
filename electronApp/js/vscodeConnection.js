@@ -41,6 +41,9 @@ var vscodeConnection=(function(){
         },
         getLevelContent:function(file,level,callback){
             socket.emit('get', { content: 'levelContent', file:file,level:level, id: pendingRequests.newId(callback) });          
+        },
+        getGameConfig:function(callback){
+            socket.emit('get', { content: 'gameconfig', id: pendingRequests.newId(callback) });          
         }
     }
 })();
