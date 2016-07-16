@@ -37,17 +37,17 @@ var basicClickPreset = [
                  var tx = e.offsetX == undefined ? e.layerX : e.offsetX;
                  var ty = e.offsetY == undefined ? e.layerY : e.offsetY;
 
-                 if (window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width < window.innerHeight / CLOCKWORKCONFIG.screenbuffer_width) {
-                     tx = CLOCKWORKCONFIG.screenbuffer_width * tx / window.innerWidth;
-                     var ypos = (window.innerHeight - CLOCKWORKCONFIG.screenbuffer_height * window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width) / 2;
-                     var height = (CLOCKWORKCONFIG.screenbuffer_height * window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width);
-                     ty = CLOCKWORKCONFIG.screenbuffer_height * (ty - ypos) / height;
-                 } else {
-                     ty = CLOCKWORKCONFIG.screenbuffer_height * ty / window.innerHeight;
-                     var xpos = (window.innerWidth - CLOCKWORKCONFIG.screenbuffer_width * window.innerHeight / CLOCKWORKCONFIG.screenbuffer_height) / 2;
-                     var width = (CLOCKWORKCONFIG.screenbuffer_width * window.innerHeight / CLOCKWORKCONFIG.screenbuffer_height);
-                     tx = CLOCKWORKCONFIG.screenbuffer_width * (tx - xpos) / width;
-                 }
+                //  if (window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width < window.innerHeight / CLOCKWORKCONFIG.screenbuffer_width) {
+                //      tx = CLOCKWORKCONFIG.screenbuffer_width * tx / window.innerWidth;
+                //      var ypos = (window.innerHeight - CLOCKWORKCONFIG.screenbuffer_height * window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width) / 2;
+                //      var height = (CLOCKWORKCONFIG.screenbuffer_height * window.innerWidth / CLOCKWORKCONFIG.screenbuffer_width);
+                //      ty = CLOCKWORKCONFIG.screenbuffer_height * (ty - ypos) / height;
+                //  } else {
+                //      ty = CLOCKWORKCONFIG.screenbuffer_height * ty / window.innerHeight;
+                //      var xpos = (window.innerWidth - CLOCKWORKCONFIG.screenbuffer_width * window.innerHeight / CLOCKWORKCONFIG.screenbuffer_height) / 2;
+                //      var width = (CLOCKWORKCONFIG.screenbuffer_width * window.innerHeight / CLOCKWORKCONFIG.screenbuffer_height);
+                //      tx = CLOCKWORKCONFIG.screenbuffer_width * (tx - xpos) / width;
+                //  }
                  this.setVar("#x",tx);
                  this.setVar("#y",ty);
                  //Warning: Read the previous warning
