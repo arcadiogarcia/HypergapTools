@@ -29,6 +29,7 @@ var editorPresets = [
                     if(workspace.currentTool=="delete"){
                         this.engine.deleteObjectLive(this);
                     }
+
                 }
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==0){
                     if(this.getVar("moving")==true){
@@ -48,6 +49,28 @@ var editorPresets = [
     collision: {
         "box": [
             { "x": 0, "y": 0, "w":100, "h":100 }
+        ]
+    }
+},
+{
+    name: "infinityCanvas",
+    events:[{
+        name:"#collide",code:function(event){
+                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
+                            if(workspace.currentTool=="new"){
+                                var type=workspace.currentPreset;
+                                var spritesheet=workspace.presetTable[type];
+                                var that=this;
+                                setTimeout(function(){
+                                    that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{type:type,spritesheet:spritesheet});
+                                },0);
+                            }
+                }
+        }
+    }],
+    collision: {
+        "box": [
+            { "x": 0, "y": 0, "w":Infinity, "h":Infinity }
         ]
     }
 },

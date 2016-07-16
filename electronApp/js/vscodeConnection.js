@@ -44,6 +44,9 @@ var vscodeConnection=(function(){
         },
         getGameConfig:function(callback){
             socket.emit('get', { content: 'gameconfig', id: pendingRequests.newId(callback) });          
+        },
+        getPresets:function(callback){
+            socket.emit('get', { content: 'presets', id: pendingRequests.newId(callback) });          
         }
     }
 })();

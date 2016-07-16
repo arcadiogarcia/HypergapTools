@@ -27,7 +27,8 @@ button{
             display:block;
             background-color: #444;
             cursor: move;
-
+            color:#AAA;
+            padding-left:5px;
  }
 
  .minimize {
@@ -96,4 +97,8 @@ button{
  .menu select{
      margin:10px;
      width: calc( 100% - 20px );
+ }
+
+ hr{
+     border:#555 solid thin;
  }

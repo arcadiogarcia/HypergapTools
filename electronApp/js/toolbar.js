@@ -1,7 +1,7 @@
 var Toolbar=(function (toolbars){
             var windows=[];
             toolbars.forEach(function(t,i){
-                windows.push({window:"toolbar"+i, handle:"handle"+i,minimize:"minimize"+i})
+                windows.push({window:"toolbar"+i, handle:"handle"+i,minimize:"minimize"+i, name:t.name})
                 var toolbar = document.createElement('div');
                 toolbar.id = 'toolbar'+i;
                 toolbar.className = 'menu';
@@ -35,6 +35,11 @@ var Toolbar=(function (toolbars){
 						case "label":
                             child.className = 'label';
 							child.innerHTML=c.text;
+                        break;
+						case "line":
+                            child.className = 'line';
+							child.id = "line_"+c.id;
+							child.innerHTML="<hr/>";
                         break;
 						case "select":
                             child.className = 'select';
@@ -104,9 +109,11 @@ var Toolbar=(function (toolbars){
 						document.getElementById(w.minimize).addEventListener("click", function(x){
 							if(minimized){
 								document.getElementById(w.window).style.height="auto";
+								document.getElementById(w.handle).innerHTML="";
 								minimized=false;
 							}else{
 								document.getElementById(w.window).style.height="20px";
+								document.getElementById(w.handle).innerHTML=w.name;
 								minimized=true;
 							}
 						});
@@ -132,6 +139,18 @@ var Toolbar=(function (toolbars){
 							}else{
 								child.className+=" disabled";
 							}
+						},
+						showSelect:function(id){
+							var child= document.getElementById("select_"+id).style.display="inline";
+						},
+						hideSelect:function(id){
+							var child= document.getElementById("select_"+id).style.display="none";
+						},
+						showLine:function(id){
+							var child= document.getElementById("line_"+id).style.display="inline";
+						},
+						hideLine:function(id){
+							var child= document.getElementById("line_"+id).style.display="none";
 						}
 					};
                 });

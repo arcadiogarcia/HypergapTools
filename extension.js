@@ -151,6 +151,7 @@ function activate(context) {
 
         var HYPERGAP={};
         var presetToSpritesheet={};
+
         HYPERGAP.presets=[];
         HYPERGAP.presets.push=function(x){
             HYPERGAP.presets=HYPERGAP.presets.concat(x);
@@ -212,6 +213,10 @@ function activate(context) {
                     case "spritesheets":
                         var manifest=readManifest();
                     	socket.emit('reply', { id:data.id, payload:manifest.spritesheets});                    	
+                    break;
+                    case "presets":
+                        var manifest=readManifest();
+                    	socket.emit('reply', { id:data.id, payload:presetToSpritesheet});                    	
                     break;
                     default:
                         console.log(data.content)

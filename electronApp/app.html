@@ -55,14 +55,14 @@
 							engineInstance.loadLevelByID("emptyLevel");
 							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
 								level.forEach(function(object){
-									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{spritesheet:object.spritesheet});
+									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{type:object.type,spritesheet:object.spritesheet});
 								})
 							});
 						break;
 					}
 		}
 		var windows=[
-			{children:[
+			{name:"Levels",children:[
 				{type:"label","text":"Select level file:"},
 				{type:"select", id:"levelFiles",options:[
 					{text:"---",value:"#---"}
@@ -101,14 +101,28 @@
 				{type:"button", text:"Undo", id:"Undo", enabled:false},
 				{type:"button", text:"Redo", id:"Redo", enabled:false}
 			]},
-			{children:[
-				{type:"button", text:"New", id:"New", enabled:true},
+			{name:"Edit",children:[
+				{type:"button", text:"New", id:"New", enabled:true,onclick:function(){
+					workspace.currentTool="new";
+					toolbars.showSelect("presetSelect");
+					toolbars.showLine("editLine");
+				}},
 				{type:"button", text:"Copy", id:"Copy", enabled:false},
 				{type:"button", text:"Delete", id:"Delete", enabled:false,onclick:function(){
 					workspace.currentTool="delete";
+					toolbars.hideSelect("presetSelect");
+					toolbars.hideLine("editLine");
 				}},
 				{type:"button", text:"Move", id:"Move", enabled:false, onclick:function(){
 					workspace.currentTool="move";
+					toolbars.hideSelect("presetSelect");
+					toolbars.hideLine("editLine");
+				}},
+				{type:"line", id:"editLine"},
+				{type:"select", id:"presetSelect",options:[
+					{text:"---",value:"#---"}
+				], onchange:function(value){
+					workspace.currentPreset=value;
 				}}
 			]}
 		];
@@ -116,6 +130,9 @@
 
 		window.onload = function() {
 			toolbars=Toolbar(windows);
+			toolbars.hideSelect("presetSelect");
+			toolbars.hideLine("editLine");
+
 			vscodeConnection.getLevelFiles(function(levels){
 				var options=[
 					{text:"---",value:"#---"},
@@ -125,6 +142,16 @@
 					options.push({text:x, value:x});
 				})
 				toolbars.setSelectOptions("levelFiles",options);
+			});
+
+			vscodeConnection.getPresets(function(presets){
+				var options=[];
+				for( var x in presets){
+					options.push({text:x, value:x});
+				}
+				toolbars.setSelectOptions("presetSelect",options);
+				workspace.currentPreset=options[0].value;
+				workspace.presetTable=presets;
 			});
 
 
