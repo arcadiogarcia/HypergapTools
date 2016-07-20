@@ -41,6 +41,15 @@ var Toolbar=(function (toolbars){
 							child.id = "line_"+c.id;
 							child.innerHTML="<hr/>";
                         break;
+						case "text":
+                            child.className = 'textInputBlock';
+							child.id = "text_"+c.id;
+							var textbox = document.createElement('input');
+							textbox.type="text";
+							textbox.id="textbox_"+c.id;
+							textbox.addEventListener("change", function(){c.onchange(textbox.value);}); 
+							child.appendChild(textbox);
+                        break;
 						case "select":
                             child.className = 'select';
 							var select= document.createElement('select');
@@ -151,6 +160,15 @@ var Toolbar=(function (toolbars){
 						},
 						hideLine:function(id){
 							var child= document.getElementById("line_"+id).style.display="none";
-						}
+						},
+						showText:function(id){
+							var child= document.getElementById("text_"+id).style.display="block";
+						},
+						hideText:function(id){
+							var child= document.getElementById("text_"+id).style.display="none";
+						},
+						setTextValue:function(id,value){
+							document.getElementById("textbox_"+id).value=value;
+						},
 					};
                 });

@@ -18,6 +18,7 @@ button{
     left:50px;
     top:50px;
     overflow: hidden;
+    transition: all 1s ease-out;
 }
 
 .handle {
@@ -100,5 +101,11 @@ button{
  }
 
  hr{
-     border:#555 solid thin;
+     border:#444 solid 1px;
+ }
+
+ .textInputBlock{
+     color: white;
+     display:block;
+     margin:10px;
  }

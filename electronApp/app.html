@@ -40,6 +40,22 @@
 		var engineInstance;
 		var canvasAnimation;
 
+		workspace.updateMoveToolbar=function(){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						toolbars.setTextValue("xObj",object.getVar("#x"));
+						toolbars.setTextValue("yObj",object.getVar("#y"));
+					}
+		}
+
+		function hideEditAdvanced(){
+				toolbars.hideSelect("presetSelect");
+				toolbars.hideLine("editLine");
+				toolbars.hideText("xCamera");
+				toolbars.hideText("yCamera");
+				toolbars.hideText("xObj");
+				toolbars.hideText("yObj");
+		}
 
 		function levelSelectChange(x){
 					workspace.setLevel(x);
@@ -102,27 +118,57 @@
 				{type:"button", text:"Redo", id:"Redo", enabled:false}
 			]},
 			{name:"Edit",children:[
-				{type:"button", text:"New", id:"New", enabled:true,onclick:function(){
+				{type:"button", text:"New", id:"New", enabled:false,onclick:function(){
 					workspace.currentTool="new";
+					hideEditAdvanced()
 					toolbars.showSelect("presetSelect");
 					toolbars.showLine("editLine");
 				}},
 				{type:"button", text:"Copy", id:"Copy", enabled:false},
 				{type:"button", text:"Delete", id:"Delete", enabled:false,onclick:function(){
 					workspace.currentTool="delete";
-					toolbars.hideSelect("presetSelect");
-					toolbars.hideLine("editLine");
+					hideEditAdvanced()
 				}},
 				{type:"button", text:"Move", id:"Move", enabled:false, onclick:function(){
 					workspace.currentTool="move";
-					toolbars.hideSelect("presetSelect");
-					toolbars.hideLine("editLine");
+					hideEditAdvanced();
+					toolbars.showLine("editLine");
+					toolbars.showText("xObj");
+					toolbars.showText("yObj");
+					workspace.updateMoveToolbar();
+				}},
+				{type:"button", text:"Move view", id:"CameraMove", enabled:false, onclick:function(){
+					workspace.currentTool="move";
+					hideEditAdvanced();
+					toolbars.showLine("editLine");
+					toolbars.showText("xCamera");
+					toolbars.showText("yCamera");
 				}},
 				{type:"line", id:"editLine"},
 				{type:"select", id:"presetSelect",options:[
 					{text:"---",value:"#---"}
 				], onchange:function(value){
 					workspace.currentPreset=value;
+				}},
+				{type:"text", id:"xObj",tag:"X coordinate", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#x",value);
+						engineInstance.execute_event("refreshSelectBox",{x:value});
+					}
+				}},
+				{type:"text", id:"yObj",tag:"Y coordinate", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#y",value);
+						engineInstance.execute_event("refreshSelectBox",{y:value});
+					}
+				}},
+				{type:"text", id:"xCamera",tag:"X coordinate", onchange:function(value){
+
+				}},
+				{type:"text", id:"yCamera",tag:"Y coordinate", onchange:function(value){
+
 				}}
 			]}
 		];
@@ -130,8 +176,7 @@
 
 		window.onload = function() {
 			toolbars=Toolbar(windows);
-			toolbars.hideSelect("presetSelect");
-			toolbars.hideLine("editLine");
+			hideEditAdvanced()
 
 			vscodeConnection.getLevelFiles(function(levels){
 				var options=[

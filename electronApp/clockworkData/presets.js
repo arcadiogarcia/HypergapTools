@@ -18,6 +18,7 @@ var editorPresets = [
             name:"#collide",code:function(event){
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
                     if(workspace.currentTool=="move"&&this.getVar("moving")==false){
+                        this.engine.setEngineVar("lastObject", this);
                         this.setVar("moving",true);
                         this.setVar("mx",this.engine.getObject(event.object).getVar("#x")-this.getVar("#x"));
                         this.setVar("my",this.engine.getObject(event.object).getVar("#y")-this.getVar("#y"));
@@ -36,6 +37,7 @@ var editorPresets = [
                         this.setVar("#x",this.engine.getObject(event.object).getVar("#x")-this.getVar("mx"));
                         this.setVar("#y",this.engine.getObject(event.object).getVar("#y")-this.getVar("my"));
                         this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                        workspace.updateMoveToolbar();
                     }else{
                         if(workspace.currentTool=="delete"){
                             this.engine.execute_event("showSelectBox",{type:"delete", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")+1});
@@ -101,6 +103,16 @@ var editorPresets = [
                         this.setVar("$h",event.h);
                         this.setVar("#state", "select");
                     break;
+                }
+            }
+        },
+        {
+            name:"refreshSelectBox",code:function(event){
+                if(event.x){
+                    this.setVar("#x",event.x);
+                }
+                if(event.y){
+                    this.setVar("#y",event.y);
                 }
             }
         },
