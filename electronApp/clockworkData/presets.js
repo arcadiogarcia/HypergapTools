@@ -67,7 +67,41 @@ var editorPresets = [
                                     that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{type:type,spritesheet:spritesheet});
                                 },0);
                             }
+                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")!=true){
+                                 this.setVar("moving",true);
+                                 console.log(1)
+                                 this.setVar("mouse",this.engine.getObject(event.object));
+                                 var camera=this.engine.getAnimationEngine().getCamera();
+                                this.setVar("mx",camera.x-this.engine.getObject(event.object).getVar("#x"));
+                                this.setVar("my",camera.y-this.engine.getObject(event.object).getVar("#y"));
+                            }
                 }
+        }
+    },
+    {
+        name:"#loop",code:function(event){
+                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")==true){
+                                var mouse=this.getVar("mouse");
+                                this.engine.getAnimationEngine().setCamera(mouse.getVar("#x")+ this.getVar("mx"),mouse.getVar("#y")+ this.getVar("my"));
+                                toolbars.setTextValue("xCamera",mouse.getVar("#x")+ this.getVar("mx"));
+						        toolbars.setTextValue("yCamera",mouse.getVar("#y")+ this.getVar("my"));
+                            }
+                
+        }
+    },
+    {
+        name:"mouseup",code:function(event){
+                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")==true){
+                                this.setVar("moving",false);
+                                console.log(2)
+                            }
+                
+        }
+    },
+     {
+        name:"setCamera",code:function(event){
+            var camera=this.engine.getAnimationEngine().getCamera();
+             this.engine.getAnimationEngine().setCamera(event.x||camera.x,event.y||camera.y);             
         }
     }],
     collision: {

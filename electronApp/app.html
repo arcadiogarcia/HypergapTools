@@ -22,7 +22,7 @@
 			return {
 				setLevel:function(x){
 					var validLevel = x!="#---" && x!="#New";
-					["Save","Undo","Redo","New","Copy","Delete","Move"].forEach(function(x){toolbars.toggleButton(x,validLevel)});
+					["Save","Undo","Redo","New","Copy","Delete","Move","CameraMove"].forEach(function(x){toolbars.toggleButton(x,validLevel)});
 					workspace.level=x;
 				},
 				getLevel:function(){
@@ -138,7 +138,7 @@
 					workspace.updateMoveToolbar();
 				}},
 				{type:"button", text:"Move view", id:"CameraMove", enabled:false, onclick:function(){
-					workspace.currentTool="move";
+					workspace.currentTool="moveCamera";
 					hideEditAdvanced();
 					toolbars.showLine("editLine");
 					toolbars.showText("xCamera");
@@ -165,10 +165,10 @@
 					}
 				}},
 				{type:"text", id:"xCamera",tag:"X coordinate", onchange:function(value){
-
+					engineInstance.execute_event("setCamera",{x:value});
 				}},
 				{type:"text", id:"yCamera",tag:"Y coordinate", onchange:function(value){
-
+					engineInstance.execute_event("setCamera",{y:value});
 				}}
 			]}
 		];

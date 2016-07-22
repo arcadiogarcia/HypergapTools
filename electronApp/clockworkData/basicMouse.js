@@ -6,7 +6,7 @@ var basicClickPreset = [
     events: [
         {
             name: "#setup", code: function (event) {
-                this.setVar("listener_click", this.engine.getEngineVar("#DOM").addEventListener("click", (function (that) { return that.execute_event.curryThis(that, "onclick") })(this), false));
+                this.setVar("listener_click", this.engine.getEngineVar("#DOM").addEventListener("mousedown", (function (that) { return that.execute_event.curryThis(that, "onclick") })(this), false));
                 this.setVar("listener_move", this.engine.getEngineVar("#DOM").addEventListener("mousemove", (function (that) { return that.execute_event.curryThis(that, "onmove") })(this), false));
                 this.setVar("listener_up", this.engine.getEngineVar("#DOM").addEventListener("mouseup", (function (that) { 
                     return function(){that.engine.execute_event("mouseup")}
