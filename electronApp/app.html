@@ -22,7 +22,7 @@
 			return {
 				setLevel:function(x){
 					var validLevel = x!="#---" && x!="#New";
-					["Save","Undo","Redo","New","Copy","Delete","Move","CameraMove"].forEach(function(x){toolbars.toggleButton(x,validLevel)});
+					["Save","Undo","Redo","New","Copy","Delete","Move","CameraMove","Select"].forEach(function(x){toolbars.toggleButton(x,validLevel)});
 					workspace.level=x;
 				},
 				getLevel:function(){
@@ -45,6 +45,16 @@
 					if(object){
 						toolbars.setTextValue("xObj",object.getVar("#x"));
 						toolbars.setTextValue("yObj",object.getVar("#y"));
+					}
+		}
+
+		workspace.updateProperties=function(){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						toolbars.setTextValue("properties.xObj",object.getVar("#x"));
+						toolbars.setTextValue("properties.yObj",object.getVar("#y"));
+						toolbars.setTextValue("properties.zObj",object.getVar("#z"));
+						toolbars.setTextValue("properties.name",object.getVar("#name"));
 					}
 		}
 
@@ -71,7 +81,7 @@
 							engineInstance.loadLevelByID("emptyLevel");
 							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
 								level.forEach(function(object){
-									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{type:object.type,spritesheet:object.spritesheet});
+									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet,"#name":object.name});
 								})
 							});
 						break;
@@ -118,6 +128,10 @@
 				{type:"button", text:"Redo", id:"Redo", enabled:false}
 			]},
 			{name:"Edit",children:[
+				{type:"button", text:"Select", id:"Select", enabled:false,onclick:function(){
+					workspace.currentTool="select";
+					hideEditAdvanced();
+				}},
 				{type:"button", text:"New", id:"New", enabled:false,onclick:function(){
 					workspace.currentTool="new";
 					hideEditAdvanced()
@@ -170,6 +184,43 @@
 				{type:"text", id:"yCamera",tag:"Y coordinate", onchange:function(value){
 					engineInstance.execute_event("setCamera",{y:value});
 				}}
+			]},
+			{name:"Properties",children:[
+				{type:"text", id:"properties.name",tag:"Name", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#name",value);
+					}
+				}},
+				{type:"label","text":"Type:"},
+				{type:"select", id:"properties.presetSelect",options:[
+					{text:"---",value:"#---"}
+				], onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#preset",value);
+					}
+				}},
+				{type:"text", id:"properties.xObj",tag:"X coordinate", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#x",value);
+						engineInstance.execute_event("refreshSelectBox",{x:value});
+					}
+				}},
+				{type:"text", id:"properties.yObj",tag:"Y coordinate", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#y",value);
+						engineInstance.execute_event("refreshSelectBox",{y:value});
+					}
+				}},
+				{type:"text", id:"properties.zObj",tag:"Z coordinate", onchange:function(value){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar("#z",value);
+					}
+				}}
 			]}
 		];
 
@@ -195,6 +246,7 @@
 					options.push({text:x, value:x});
 				}
 				toolbars.setSelectOptions("presetSelect",options);
+				toolbars.setSelectOptions("properties.presetSelect",options);
 				workspace.currentPreset=options[0].value;
 				workspace.presetTable=presets;
 			});

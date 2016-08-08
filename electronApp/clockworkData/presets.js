@@ -10,7 +10,7 @@ var editorPresets = [
     sprite: "object",
     events:[{
         name:"#setup", code:function(event){
-            this.engine.getAnimationEngine().setSpritesheet(this.spriteholder,this.getVar("spritesheet"));
+            this.engine.getAnimationEngine().setSpritesheet(this.spriteholder,this.getVar("#spritesheet"));
             this.setVar("moving",false);
 
         }
@@ -30,7 +30,10 @@ var editorPresets = [
                     if(workspace.currentTool=="delete"){
                         this.engine.deleteObjectLive(this);
                     }
-
+                    if(workspace.currentTool=="select"){
+                        this.engine.setEngineVar("lastObject", this);
+                        workspace.updateProperties();
+                    }
                 }
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==0){
                     if(this.getVar("moving")==true){
@@ -64,7 +67,7 @@ var editorPresets = [
                                 var spritesheet=workspace.presetTable[type];
                                 var that=this;
                                 setTimeout(function(){
-                                    that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{type:type,spritesheet:spritesheet});
+                                    that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{"#preset":type,"#spritesheet":spritesheet});
                                 },0);
                             }
                             if(workspace.currentTool=="moveCamera" && this.getVar("moving")!=true){

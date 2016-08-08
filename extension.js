@@ -9,11 +9,12 @@ var spawn = require('child_process').spawn;
 const exec = require('child_process').exec;
 var xml2js = require('xml2js');
 var xmlparser = new xml2js.Parser();
-var serverPort=3000;
+var serverPort = 3000;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
+    var creatingNewProject = false;
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
@@ -23,6 +24,7 @@ function activate(context) {
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
     var disposable1 = vscode.commands.registerCommand('extension.createProject', function () {
+        creatingNewProject = true;
         // The code you place here will be executed every time your command is executed
         vscode.window.showInputBox({ placeHolder: "Game name", prompt: "Write a name for your game:" }).then(projectName => {
             // fs.closeSync(fs.openSync(vscode.workspace.rootPath + "/package.json", 'w'));
@@ -81,15 +83,16 @@ function activate(context) {
             if (packagePath !== false) {
                 localServer.setDeployPackage(packagePath);
                 const opn = require('opn');
-                opn("com.hypergap.deploy://" + "localhost:"+serverPort+"/deployPackage");
+                opn("com.hypergap.deploy://" + "localhost:" + serverPort + "/deployPackage");
             }
         }
     });
 
     var disposable4 = vscode.commands.registerCommand('extension.openLevelEditor', function () {
         // The code you place here will be executed every time your command is executed
-        var thisExtension=vscode.extensions.getExtension('ArcadioGarcia.hypergap-tools');
-        var child = spawn(thisExtension.extensionPath+"/electronApp/hypergaptools-electron-component-win32-ia32/hypergaptools-electron-component.exe");
+        var thisExtension = vscode.extensions.getExtension('ArcadioGarcia.hypergap-tools');
+        var child = exec(thisExtension.extensionPath+"\\node_modules\\.bin\\electron "+thisExtension.extensionPath +'\\electronApp\\');
+        // var child = spawn(thisExtension.extensionPath + "/electronApp/hypergaptools-electron-component-win32-ia32/hypergaptools-electron-component.exe");
     });
 
 
@@ -120,12 +123,14 @@ function activate(context) {
         }
     }
 
-    function readManifest() {
+    function readManifest(safeMode) {
         try {
             var manifest = require(vscode.workspace.rootPath + '/manifest.json');
         } catch (e) {
-            vscode.window.showErrorMessage("There is no HyperGap project in this folder! (manifest.json is missing)");
-            vscode.window.showErrorMessage("If you want to create a new HyperGap game, run 'Create HyperGap project'");
+            if (!safeMode && creatingNewProject == false) {
+                vscode.window.showErrorMessage("There is no HyperGap project in this folder! (manifest.json is missing)");
+                vscode.window.showErrorMessage("If you want to create a new HyperGap game, run 'Create HyperGap project'");
+            }
             return null;
         }
         return manifest;
@@ -149,75 +154,81 @@ function activate(context) {
         var io = require('socket.io')(server);
 
 
-        var HYPERGAP={};
-        var presetToSpritesheet={};
+        var HYPERGAP = {};
+        var presetToSpritesheet = {};
 
-        HYPERGAP.presets=[];
-        HYPERGAP.presets.push=function(x){
-            HYPERGAP.presets=HYPERGAP.presets.concat(x);
+        HYPERGAP.presets = [];
+        HYPERGAP.presets.push = function (x) {
+            HYPERGAP.presets = HYPERGAP.presets.concat(x);
         }
-        var manifest=readManifest();
-        manifest.presets.asyncForEach(function(x,cb){
-            fs.readFile(vscode.workspace.rootPath + "/" + manifest.scope + "/" + x, function(err, script) {
-                eval(script.toString());//I know, I know
-                cb();
+        var manifest = readManifest(true);
+        if (manifest) {
+            manifest.presets.asyncForEach(function (x, cb) {
+                fs.readFile(vscode.workspace.rootPath + "/" + manifest.scope + "/" + x, function (err, script) {
+                    eval(script.toString());//I know, I know
+                    cb();
+                });
+            }, function () {
+                HYPERGAP.presets.forEach(function (x) {
+                    presetToSpritesheet[x.name] = x.sprite;
+                })
             });
-        }, function(){
-            HYPERGAP.presets.forEach(function(x){
-                presetToSpritesheet[x.name]=x.sprite;
-            })
-        });
+        }
 
-        
+
 
         io.on('connection', function (socket) {
             socket.on('get', function (data) {
-                switch(data.content){
+                switch (data.content) {
                     case "scope":
-                        var manifest=readManifest();
-                    	socket.emit('reply', { id:data.id, payload:vscode.workspace.rootPath + '/'+manifest.scope+ '/'});
-                    break;
+                        var manifest = readManifest();
+                        socket.emit('reply', { id: data.id, payload: vscode.workspace.rootPath + '/' + manifest.scope + '/' });
+                        break;
                     case "gameconfig":
-                        var manifest=readManifest();
-                    	socket.emit('reply', { id:data.id, payload:{
-                            width:manifest.screenResolution.w,
-                            height:manifest.screenResolution.h,
-                            enginefps:manifest.enginefps,
-                            animationfps:manifest.animationfps
-                        }});
-                    break;
+                        var manifest = readManifest();
+                        socket.emit('reply', {
+                            id: data.id, payload: {
+                                width: manifest.screenResolution.w,
+                                height: manifest.screenResolution.h,
+                                enginefps: manifest.enginefps,
+                                animationfps: manifest.animationfps
+                            }
+                        });
+                        break;
                     case "levelFiles":
-                        var manifest=readManifest();
-                    	socket.emit('reply', { id:data.id, payload:manifest.levels});
-                    break;
+                        var manifest = readManifest();
+                        socket.emit('reply', { id: data.id, payload: manifest.levels });
+                        break;
                     case "levels":
-                        var manifest=readManifest();
-                        fs.readFile(vscode.workspace.rootPath + '/'+manifest.scope+ '/'+data.file, function(err, xmldata) {
+                        var manifest = readManifest();
+                        fs.readFile(vscode.workspace.rootPath + '/' + manifest.scope + '/' + data.file, function (err, xmldata) {
                             xmlparser.parseString(xmldata, function (err, result) {
-                                socket.emit('reply', { id:data.id, payload:result.levels.level.map(function(x){return x.$.id})});
+                                socket.emit('reply', { id: data.id, payload: result.levels.level.map(function (x) { return x.$.id }) });
                             });
-                        });                    	
-                    break;
+                        });
+                        break;
                     case "levelContent":
-                        var manifest=readManifest();
-                        fs.readFile(vscode.workspace.rootPath + '/'+manifest.scope+ '/'+data.file, function(err, xmldata) {
+                        var manifest = readManifest();
+                        fs.readFile(vscode.workspace.rootPath + '/' + manifest.scope + '/' + data.file, function (err, xmldata) {
                             xmlparser.parseString(xmldata, function (err, result) {
-                                var levelContent=result.levels.level.filter(function(x){return x.$.id==data.level})[0].object.map(function(x){return x.$});
-                                socket.emit('reply', { id:data.id, payload:levelContent.map(function(x){
-                                    x.spritesheet=presetToSpritesheet[x.type];
-                                    return x;
-                                })});
+                                var levelContent = result.levels.level.filter(function (x) { return x.$.id == data.level })[0].object.map(function (x) { return x.$ });
+                                socket.emit('reply', {
+                                    id: data.id, payload: levelContent.map(function (x) {
+                                        x.spritesheet = presetToSpritesheet[x.type];
+                                        return x;
+                                    })
+                                });
                             });
-                        });                    	
-                    break;
+                        });
+                        break;
                     case "spritesheets":
-                        var manifest=readManifest();
-                    	socket.emit('reply', { id:data.id, payload:manifest.spritesheets});                    	
-                    break;
+                        var manifest = readManifest();
+                        socket.emit('reply', { id: data.id, payload: manifest.spritesheets });
+                        break;
                     case "presets":
-                        var manifest=readManifest();
-                    	socket.emit('reply', { id:data.id, payload:presetToSpritesheet});                    	
-                    break;
+                        var manifest = readManifest();
+                        socket.emit('reply', { id: data.id, payload: presetToSpritesheet });
+                        break;
                     default:
                         console.log(data.content)
                 }
@@ -225,7 +236,7 @@ function activate(context) {
         });
 
         return {
-            setDeployPackage:function (someFile) {
+            setDeployPackage: function (someFile) {
                 file = someFile;
             }
         }
@@ -245,14 +256,14 @@ exports.deactivate = deactivate;
 
 
 //Useful when you need to perform async operations on each of the elements of an array, but in strict order, and execute a callback at the end
-   Object.defineProperty(Array.prototype, 'asyncForEach', {
-            enumerable: false,
-            value: function (action, cb, index) {
-                var i = index || 0;
-                if (i >= this.length) {
-                    return cb();
-                }
-                var that = this;
-                return action(this[i], function () { that.asyncForEach(action, cb,i + 1); });
-            }
-        });
+Object.defineProperty(Array.prototype, 'asyncForEach', {
+    enumerable: false,
+    value: function (action, cb, index) {
+        var i = index || 0;
+        if (i >= this.length) {
+            return cb();
+        }
+        var that = this;
+        return action(this[i], function () { that.asyncForEach(action, cb, i + 1); });
+    }
+});

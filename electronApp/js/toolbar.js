@@ -44,6 +44,7 @@ var Toolbar=(function (toolbars){
 						case "text":
                             child.className = 'textInputBlock';
 							child.id = "text_"+c.id;
+							child.innerHTML=c.tag+": <br/>";
 							var textbox = document.createElement('input');
 							textbox.type="text";
 							textbox.id="textbox_"+c.id;
