@@ -220,6 +220,13 @@
 					if(object){
 						object.setVar("#z",value);
 					}
+				}},
+				{type:"map", id:"properties.map", onchange:function(key,value,oldkey){
+					// var object=engineInstance.getEngineVar("lastObject");
+					// if(object){
+					// 	object.setVar(key,value);
+					// }
+					console.log(key+'=>'+value+' . Remove '+oldkey);
 				}}
 			]}
 		];

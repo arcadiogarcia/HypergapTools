@@ -1,5 +1,6 @@
 var Toolbar=(function (toolbars){
             var windows=[];
+			var maps={};
             toolbars.forEach(function(t,i){
                 windows.push({window:"toolbar"+i, handle:"handle"+i,minimize:"minimize"+i, name:t.name})
                 var toolbar = document.createElement('div');
@@ -66,6 +67,23 @@ var Toolbar=(function (toolbars){
 							child.appendChild(select);
 							select.addEventListener("change", function(){c.onchange(select.value);}); 
                         break;
+						case "map":
+							maps[c.id]={};
+							maps[c.id].length=0;
+							maps[c.id].keys=[];
+							child.className = 'map';
+							child.id='map_'+c.id;
+							var content = document.createElement('div');
+							content.id='map_'+c.id+'.content';
+							child.appendChild(content);
+							var add = document.createElement('button');
+							add.id='map_'+c.id+'.add';
+							add.innerHTML="+";
+							add.addEventListener("click", function(){
+								addMapEntry(c.id, c.onchange);
+							}); 
+							child.appendChild(add);
+						break;
                     }
                     toolbar.appendChild(child);
                 })
@@ -129,6 +147,53 @@ var Toolbar=(function (toolbars){
 						});
 					});
 
+					function addMapEntry(id, onchange){
+							var index=maps[id].length++;
+							var container = document.createElement('div');
+							container.id='map_'+id+'.content.'+index;
+
+							var textbox = document.createElement('input');
+							textbox.type="text";
+							textbox.id='map_'+id+'.content.'+'key_'+index;
+							textbox.value="key "+index;
+							maps[id].keys[index]=textbox.value;
+							textbox.addEventListener("change", function(){
+								onchange(textbox.value,textbox2.value,maps[id].keys[index]);
+								maps[id].keys[index]=textbox.value;
+							}); 
+							container.appendChild(textbox);
+							
+							var semicolon = document.createElement('div');
+							semicolon.innerHTML=" : ";
+							semicolon.style.display="inline";
+							semicolon.style.color="white";
+							container.appendChild(semicolon);
+
+							var textbox2 = document.createElement('input');
+							textbox2.type="text";
+							textbox2.id='map_'+id+'.content.'+'value_'+index;
+							textbox2.value="value "+index;
+							textbox2.addEventListener("change", function(){
+								onchange(textbox.value,textbox2.value,maps[id].keys[index]);
+							}); 
+							container.appendChild(textbox2);
+
+							var remove = document.createElement('button');
+							textbox2.id='map_'+id+'.content.'+'remove_'+index;
+							remove.innerHTML="-";
+							remove.addEventListener("click", function(){
+								removeMapEntry(id,index);
+							}); 
+							container.appendChild(remove);
+
+							document.getElementById('map_'+id+'.content').appendChild(container);
+						}
+
+					function removeMapEntry(id,index){
+						var item = document.getElementById('map_'+id+'.content.'+index);
+						item.parentNode.removeChild(item);
+					}
+
                     return {
 						setSelectOptions:function(id, values){
 							var select= document.getElementById("select_"+id);
@@ -171,5 +236,6 @@ var Toolbar=(function (toolbars){
 						setTextValue:function(id,value){
 							document.getElementById("textbox_"+id).value=value;
 						},
+						addMapEntry:addMapEntry
 					};
                 });
