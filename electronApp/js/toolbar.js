@@ -147,7 +147,7 @@ var Toolbar=(function (toolbars){
 						});
 					});
 
-					function addMapEntry(id, onchange){
+					function addMapEntry(id, onchange, key, value){
 							var index=maps[id].length++;
 							var container = document.createElement('div');
 							container.id='map_'+id+'.content.'+index;
@@ -155,7 +155,7 @@ var Toolbar=(function (toolbars){
 							var textbox = document.createElement('input');
 							textbox.type="text";
 							textbox.id='map_'+id+'.content.'+'key_'+index;
-							textbox.value="key "+index;
+							textbox.value=key||("key "+index);
 							maps[id].keys[index]=textbox.value;
 							textbox.addEventListener("change", function(){
 								onchange(textbox.value,textbox2.value,maps[id].keys[index]);
@@ -172,7 +172,7 @@ var Toolbar=(function (toolbars){
 							var textbox2 = document.createElement('input');
 							textbox2.type="text";
 							textbox2.id='map_'+id+'.content.'+'value_'+index;
-							textbox2.value="value "+index;
+							textbox2.value=value||("value "+index);
 							textbox2.addEventListener("change", function(){
 								onchange(textbox.value,textbox2.value,maps[id].keys[index]);
 							}); 
@@ -236,6 +236,10 @@ var Toolbar=(function (toolbars){
 						setTextValue:function(id,value){
 							document.getElementById("textbox_"+id).value=value;
 						},
-						addMapEntry:addMapEntry
+						addMapEntry:addMapEntry,
+						clearMap:function(id){
+							maps[id].length=0;	
+							document.getElementById('map_'+id+'.content').innerHTML="";
+						}
 					};
                 });

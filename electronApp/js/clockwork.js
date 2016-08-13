@@ -424,6 +424,13 @@ var Clockwork = (function () {
             //Mark as dirty
             collisionChanged: function (name) {
                 this.vars["#moveflag"] = true;
+            },
+            getVarKeys:function(){
+                var keys=[];
+                for(var k in this.vars){
+                    keys.push(k);
+                }
+                return keys;
             }
         };
     }

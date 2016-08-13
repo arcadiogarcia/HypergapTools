@@ -55,6 +55,19 @@
 						toolbars.setTextValue("properties.yObj",object.getVar("#y"));
 						toolbars.setTextValue("properties.zObj",object.getVar("#z"));
 						toolbars.setTextValue("properties.name",object.getVar("#name"));
+						var keys=object.getVarKeys();
+						toolbars.clearMap("properties.map");
+						keys.forEach(function(k){
+							if(k[0]=="#"){return}
+							var value=object.getVar(k);
+							toolbars.addMapEntry("properties.map",function(key,value,oldkey){
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar(oldkey,undefined);
+						object.setVar(key,value);
+					}
+				},k,value);
+						});
 					}
 		}
 
@@ -81,7 +94,7 @@
 							engineInstance.loadLevelByID("emptyLevel");
 							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
 								level.forEach(function(object){
-									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet,"#name":object.name});
+									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet||"objectWithNoSpritesheet","#name":object.name});
 								})
 							});
 						break;
@@ -222,11 +235,11 @@
 					}
 				}},
 				{type:"map", id:"properties.map", onchange:function(key,value,oldkey){
-					// var object=engineInstance.getEngineVar("lastObject");
-					// if(object){
-					// 	object.setVar(key,value);
-					// }
-					console.log(key+'=>'+value+' . Remove '+oldkey);
+					var object=engineInstance.getEngineVar("lastObject");
+					if(object){
+						object.setVar(oldkey,undefined);
+						object.setVar(key,value);
+					}
 				}}
 			]}
 		];

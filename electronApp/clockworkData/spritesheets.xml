@@ -16,6 +16,22 @@
     </frames>
   </spritesheet>
 
+    <spritesheet name="objectWithNoSpritesheet" src="clockworkData/objectWithNoSpritesheet.png">
+    <states>
+      <state name="object">
+        <layer name="object"></layer>
+      </state>
+    </states>
+    <layers>
+      <layer name="object" x="0" y="0">
+         <frame name="object"></frame>
+      </layer>
+    </layers>
+    <frames>
+      <frame name="object" x="0" y="0" w="100" h="100" t="0"></frame>
+    </frames>
+  </spritesheet>
+
     <spritesheet name="selectBox" >
     <states>
       <state name="hide">

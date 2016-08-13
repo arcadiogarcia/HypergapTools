@@ -11,20 +11,20 @@ var editorPresets = [
     events:[{
         name:"#setup", code:function(event){
             this.engine.getAnimationEngine().setSpritesheet(this.spriteholder,this.getVar("#spritesheet"));
-            this.setVar("moving",false);
+            this.setVar("#moving",false);
 
         }
     },{
             name:"#collide",code:function(event){
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
-                    if(workspace.currentTool=="move"&&this.getVar("moving")==false){
+                    if(workspace.currentTool=="move"&&this.getVar("#moving")==false){
                         this.engine.setEngineVar("lastObject", this);
-                        this.setVar("moving",true);
+                        this.setVar("#moving",true);
                         this.setVar("mx",this.engine.getObject(event.object).getVar("#x")-this.getVar("#x"));
                         this.setVar("my",this.engine.getObject(event.object).getVar("#y")-this.getVar("#y"));
                         this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
                     }else{
-                        this.setVar("moving",false);
+                        this.setVar("#moving",false);
                         this.engine.execute_event("hideSelectBox");
                     }
                     if(workspace.currentTool=="delete"){
@@ -36,7 +36,7 @@ var editorPresets = [
                     }
                 }
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==0){
-                    if(this.getVar("moving")==true){
+                    if(this.getVar("#moving")==true){
                         this.setVar("#x",this.engine.getObject(event.object).getVar("#x")-this.getVar("mx"));
                         this.setVar("#y",this.engine.getObject(event.object).getVar("#y")-this.getVar("my"));
                         this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
@@ -64,14 +64,14 @@ var editorPresets = [
                  if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
                             if(workspace.currentTool=="new"){
                                 var type=workspace.currentPreset;
-                                var spritesheet=workspace.presetTable[type];
+                                var spritesheet=workspace.presetTable[type] || "objectWithNoSpritesheet";
                                 var that=this;
                                 setTimeout(function(){
                                     that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{"#preset":type,"#spritesheet":spritesheet});
                                 },0);
                             }
-                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")!=true){
-                                 this.setVar("moving",true);
+                            if(workspace.currentTool=="moveCamera" && this.getVar("#moving")!=true){
+                                 this.setVar("#moving",true);
                                  console.log(1)
                                  this.setVar("mouse",this.engine.getObject(event.object));
                                  var camera=this.engine.getAnimationEngine().getCamera();
@@ -83,7 +83,7 @@ var editorPresets = [
     },
     {
         name:"#loop",code:function(event){
-                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")==true){
+                            if(workspace.currentTool=="moveCamera" && this.getVar("#moving")==true){
                                 var mouse=this.getVar("mouse");
                                 this.engine.getAnimationEngine().setCamera(mouse.getVar("#x")+ this.getVar("mx"),mouse.getVar("#y")+ this.getVar("my"));
                                 toolbars.setTextValue("xCamera",mouse.getVar("#x")+ this.getVar("mx"));
@@ -94,8 +94,8 @@ var editorPresets = [
     },
     {
         name:"mouseup",code:function(event){
-                            if(workspace.currentTool=="moveCamera" && this.getVar("moving")==true){
-                                this.setVar("moving",false);
+                            if(workspace.currentTool=="moveCamera" && this.getVar("#moving")==true){
+                                this.setVar("#moving",false);
                                 console.log(2)
                             }
                 
