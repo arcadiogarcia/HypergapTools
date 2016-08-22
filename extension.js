@@ -177,7 +177,46 @@ function activate(context) {
 
 
 
-        io.on('connection', function (socket) {
+        io.on('connection', function (socket) {   
+            socket.on('save', function (data) {
+                switch (data.content) {
+                    case "level":
+                        var levelContent=JSON.parse(data.levelContent);
+                        var manifest = readManifest();
+                        fs.readFile(vscode.workspace.rootPath + '/' + manifest.scope + '/' + data.file, function (err, xmldata) {
+                            xmlparser.parseString(xmldata, function (err, result) {
+                                result.levels.level.forEach(function (x) { if (x.$.id == data.level){
+                                    x.object=levelContent.map(function(o){
+                                        var vars={};
+                                        for( k in o){
+                                            if(k[0]=="#"){continue;}
+                                            vars[k]=o[k];
+                                        };
+                                        return {$:{
+                                            name:o["#name"],
+                                            type:o["#preset"],
+                                            x:o["#x"],
+                                            y:o["#y"],
+                                            z:o["#z"]||0,
+                                            vars:JSON.stringify(vars)
+                                        }}
+                                    });
+                                }
+                            });
+                            var builder = new xml2js.Builder();
+                            var xml = builder.buildObject(result);
+                            fs.writeFile(vscode.workspace.rootPath + '/' + manifest.scope + '/' + data.file, xml,function (err) {
+                                if(!err){
+                                  socket.emit('reply', { id: data.id, payload: "OK" });
+                                }else{
+                                  socket.emit('reply', { id: data.id, payload: err });  
+                                }
+                            });
+                            });
+                        });
+                        break;
+                    }
+            });
             socket.on('get', function (data) {
                 switch (data.content) {
                     case "scope":

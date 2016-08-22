@@ -55,6 +55,7 @@
 						toolbars.setTextValue("properties.yObj",object.getVar("#y"));
 						toolbars.setTextValue("properties.zObj",object.getVar("#z"));
 						toolbars.setTextValue("properties.name",object.getVar("#name"));
+						toolbars.setSelectValue("properties.presetSelect",object.getVar("#preset"));
 						var keys=object.getVarKeys();
 						toolbars.clearMap("properties.map");
 						keys.forEach(function(k){
@@ -69,6 +70,16 @@
 				},k,value);
 						});
 					}
+		}
+
+		workspace.updateObjectList=function(){
+			var options=engineInstance.listObjects().filter(function(x){
+				return engineInstance.find(x).getVar("#hypergapEditor") != true;
+			}).map(function(x){
+				return {text:x, value:x};
+			})
+			toolbars.setSelectOptions("level.objects",options);
+			toolbars.setSelectSize("level.objects",options.length);
 		}
 
 		function hideEditAdvanced(){
@@ -96,6 +107,7 @@
 								level.forEach(function(object){
 									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet||"objectWithNoSpritesheet","#name":object.name});
 								})
+								workspace.updateObjectList();
 							});
 						break;
 					}
@@ -136,7 +148,26 @@
 				{type:"select", id:"levelSelect",options:[
 					{text:"---",value:"#---"}
 				], onchange:levelSelectChange},
-				{type:"button", text:"Save", id:"Save", enabled:false},
+				{type:"button", text:"Save", id:"Save", enabled:false,
+						onclick:function(){
+							var objects=engineInstance.listObjects().map(function(x){
+								return engineInstance.find(x);
+							}).filter(function(x){
+								return x.getVar("#hypergapEditor") != true;
+							}).map(function(x){
+								var vars={};
+								var keys=x.getVarKeys();
+								keys.forEach(function(k){
+									// if(k[0]=="#"){return;}
+									vars[k]=x.getVar(k);
+								});
+								// return "<object name='"+x.getVar("#name")+"' type='"+x.getVar("#preset")+"' x='"+x.getVar("#x")+"' y='"+x.getVar("#y")+"' z='"+(x.getVar("#z")||0)+"' vars='"+JSON.stringify(vars)+"'></object>";
+								return vars;
+							});
+							vscodeConnection.saveLevel(workspace.getLevelFile(),workspace.getLevel(),JSON.stringify(objects),function(){
+
+							});
+				}},
 				{type:"button", text:"Undo", id:"Undo", enabled:false},
 				{type:"button", text:"Redo", id:"Redo", enabled:false}
 			]},
@@ -203,6 +234,7 @@
 					var object=engineInstance.getEngineVar("lastObject");
 					if(object){
 						object.setVar("#name",value);
+						workspace.updateObjectList();
 					}
 				}},
 				{type:"label","text":"Type:"},
@@ -212,6 +244,8 @@
 					var object=engineInstance.getEngineVar("lastObject");
 					if(object){
 						object.setVar("#preset",value);
+						object.setVar("#spritesheet",workspace.presetTable[value]);
+						object.execute_event("#setup");
 					}
 				}},
 				{type:"text", id:"properties.xObj",tag:"X coordinate", onchange:function(value){
@@ -240,6 +274,15 @@
 						object.setVar(oldkey,undefined);
 						object.setVar(key,value);
 					}
+				}}
+			]},
+			{name:"Level",children:[
+				{type:"label","text":"Objects:"},
+				{type:"select", id:"level.objects",options:[
+				], onchange:function(value){
+					engineInstance.setEngineVar("lastObject", engineInstance.find(value));
+					workspace.updateProperties();
+					workspace.updateMoveToolbar();
 				}}
 			]}
 		];
@@ -289,18 +332,19 @@
 				CLOCKWORKCONFIG.screenbuffer_width=config.width;
 				CLOCKWORKCONFIG.screenbuffer_height=config.height;
 				canvasAnimation.setBufferSize(config.width, config.height);
-				vscodeConnection.getScope(function(scope){
-					workspace.scope=scope;
-					canvasAnimation.setRootFolder(scope);
-					vscodeConnection.getSpritesheets(function(spritesheets){
-						canvasAnimation.asyncLoadMultiple(spritesheets.map(function(x){
-							return scope+x;
-						}), function(){
-							//Success
-						})
+				canvasAnimation.asyncLoad("clockworkData/spritesheets.xml",function(){
+					vscodeConnection.getScope(function(scope){
+						workspace.scope=scope;
+						canvasAnimation.setRootFolder(scope);
+						vscodeConnection.getSpritesheets(function(spritesheets){
+							canvasAnimation.asyncLoadMultiple(spritesheets.map(function(x){
+								return scope+x;
+							}), function(){
+								callback_load();
+							})
+						});
 					});
 				});
-				canvasAnimation.asyncLoad("clockworkData/spritesheets.xml", callback_load);
 				
 				function callback_load() {
 					engineInstance = new Clockwork();

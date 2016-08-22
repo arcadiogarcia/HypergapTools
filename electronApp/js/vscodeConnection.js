@@ -47,6 +47,9 @@ var vscodeConnection=(function(){
         },
         getPresets:function(callback){
             socket.emit('get', { content: 'presets', id: pendingRequests.newId(callback) });          
-        }
+        },
+        saveLevel:function(file,level,content,callback){
+            socket.emit('save', { content: 'level', file:file,level:level,levelContent:content, id: pendingRequests.newId(callback) });          
+        },
     }
 })();

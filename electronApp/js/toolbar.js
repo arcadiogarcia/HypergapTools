@@ -207,6 +207,12 @@ var Toolbar=(function (toolbars){
 								select.appendChild(x);
 							});
 						},
+						setSelectValue:function(id, value){
+							document.getElementById("select_"+id).value=value;
+						},
+						setSelectSize:function(id, size){
+							document.getElementById("select_"+id).size=size;
+						},
 						toggleButton:function(id, value){
 							var child= document.getElementById("button_"+id);
 							if(value){

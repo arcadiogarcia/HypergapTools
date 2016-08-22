@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <levels>
   <level id="emptyLevel">
-        <object name="bg" type="bg" x="0" y="0" z="-Infinity"></object>
-        <object name="infinityCanvas" type="infinityCanvas" x="0" y="0" z="-Infinity"></object>
-        <object name="mouse" type="basicMouse" x="0" y="0" z="0"></object>
-        <object name="select" type="selectBox" x="0" y="0" z="0"></object>
+        <object name="bg" type="bg" x="0" y="0" z="-Infinity" vars='{"#hypergapEditor":true}'></object>
+        <object name="infinityCanvas" type="infinityCanvas" x="0" y="0" z="-Infinity" vars='{"#hypergapEditor":true}'></object>
+        <object name="mouse" type="basicMouse" x="0" y="0" z="0" vars='{"#hypergapEditor":true}'></object>
+        <object name="select" type="selectBox" x="0" y="0" z="0" vars='{"#hypergapEditor":true}'></object>
   </level>
 </levels>
