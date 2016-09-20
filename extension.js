@@ -171,6 +171,15 @@ function activate(context) {
             }, function () {
                 HYPERGAP.presets.forEach(function (x) {
                     presetToSpritesheet[x.name] = x.sprite;
+                    if(x.inherits){
+                        if (x.inherits.forEach){
+                            x.inherits.forEach(function(parent){
+                                presetToSpritesheet[x.name] = presetToSpritesheet[x.name] || presetToSpritesheet[parent];
+                            })
+                        }else{
+                            presetToSpritesheet[x.name]=presetToSpritesheet[x.inherits];
+                        }
+                    }
                 })
             });
         }
