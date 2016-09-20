@@ -48,8 +48,9 @@ var basicClickPreset = [
                 //      var width = (CLOCKWORKCONFIG.screenbuffer_width * window.innerHeight / CLOCKWORKCONFIG.screenbuffer_height);
                 //      tx = CLOCKWORKCONFIG.screenbuffer_width * (tx - xpos) / width;
                 //  }
-                 this.setVar("#x",tx);
-                 this.setVar("#y",ty);
+                 var camera=this.engine.getAnimationEngine().getCamera();
+                 this.setVar("#x",+tx + +camera.x);
+                 this.setVar("#y",+ty + +camera.y);
                  //Warning: Read the previous warning
              }
          },
