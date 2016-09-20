@@ -109,8 +109,8 @@ function activate(context) {
                     console.log(data.toString());
                 });
                 child.stdin.write('mkdir "' + vscode.workspace.rootPath + '\\HypergapPackageTemp" \n');
-                child.stdin.write('Copy-Item ' + vscode.workspace.rootPath + '/manifest.json ' + vscode.workspace.rootPath + '/HypergapPackageTemp \n');
-                child.stdin.write('Copy-Item ' + vscode.workspace.rootPath + '/' + manifest.scope + ' ' + vscode.workspace.rootPath + '/HypergapPackageTemp -Recurse\n');
+                child.stdin.write('Copy-Item "' + vscode.workspace.rootPath + '/manifest.json" "' + vscode.workspace.rootPath + '/HypergapPackageTemp" \n');
+                child.stdin.write('Copy-Item "' + vscode.workspace.rootPath + '/' + manifest.scope + '" "' + vscode.workspace.rootPath + '/HypergapPackageTemp" -Recurse\n');
                 child.stdin.write('Add-Type -A System.IO.Compression.FileSystem\n');
                 child.stdin.write('Remove-Item "' + vscode.workspace.rootPath + '\\' + manifest.name + '.hgp" \n');
                 child.stdin.write("[IO.Compression.ZipFile]::CreateFromDirectory('" + vscode.workspace.rootPath + "/HypergapPackageTemp', '" + vscode.workspace.rootPath + "/" + manifest.name + ".hgp')\n");
@@ -250,7 +250,7 @@ function activate(context) {
                         var manifest = readManifest();
                         fs.readFile(vscode.workspace.rootPath + '/' + manifest.scope + '/' + data.file, function (err, xmldata) {
                             xmlparser.parseString(xmldata, function (err, result) {
-                                var levelContent = result.levels.level.filter(function (x) { return x.$.id == data.level })[0].object.map(function (x) { return x.$ });
+                                var levelContent = (result.levels.level.filter(function (x) { return x.$.id == data.level })[0].object || []).map(function (x) { return x.$ });
                                 socket.emit('reply', {
                                     id: data.id, payload: levelContent.map(function (x) {
                                         x.spritesheet = presetToSpritesheet[x.type];

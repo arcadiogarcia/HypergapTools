@@ -641,6 +641,35 @@ var Spritesheet = (function () {
         },
         setRootFolder: function(folder){
             rootFolder=folder;
+        },
+        getSpriteBox: function(spritesheet, animationstate){
+            var minX, maxX,minY, maxY;
+            var spritesheet = searchWhere(spritesheets, "name", spritesheet);
+            var state = spritesheet.states[0];
+            if (animationstate != undefined) {
+                state = searchWhere(spritesheet.states, "name", animationstate);
+            }
+            //We loop over the layers of its current state
+            for (var i in state.layers) {
+                 var layer_n = state.layers[i];
+                 var layer = spritesheet.layers[layer_n];
+                 for (var j in layer.frames) {
+                    var frame = spritesheet.frames[layer.frames[j]];
+                    if(frame.x < minX || minX==undefined){
+                        minX=frame.x;
+                    }
+                    if(frame.y < minY || minY==undefined){
+                        minY=frame.y;
+                    }
+                    if(frame.x+frame.w>maxX||maxX==undefined){
+                        maxX=frame.x+frame.w;
+                    }
+                    if(frame.y+frame.h>maxY||maxY==undefined){
+                        maxY=frame.y+frame.h;
+                    }
+                 }
+            }
+            return {x:minX||0,y:minY||0, w:(maxX-minX)||100, h:(maxY-minY)||100};
         }
     };
 

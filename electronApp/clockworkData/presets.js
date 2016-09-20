@@ -12,19 +12,20 @@ var editorPresets = [
         name:"#setup", code:function(event){
             this.engine.getAnimationEngine().setSpritesheet(this.spriteholder,this.getVar("#spritesheet"));
             this.setVar("#editor.moving",false);
-
+            this.setCollider("hitbox", this.getVar("#boundingBox"));
         }
     },{
             name:"#collide",code:function(event){
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
                     if(workspace.currentTool=="move"&&this.getVar("#editor.moving")==false){
+                        
                         if(this.engine.getEngineVar("justSelectedSomething")!=true){
                             this.engine.setEngineVar("justSelectedSomething",true);
                             this.engine.setEngineVar("lastObject", this);
                             this.setVar("#editor.moving",true);
                             this.setVar("#editor.mx",this.engine.getObject(event.object).getVar("#x")-this.getVar("#x"));
                             this.setVar("#editor.my",this.engine.getObject(event.object).getVar("#y")-this.getVar("#y"));
-                            this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                            this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:this.getVar("#boundingBox").w,h:this.getVar("#boundingBox").h,z:this.getVar("#z")-1});
                         }
                     }else{
                         this.engine.setEngineVar("justSelectedSomething",false);
@@ -44,13 +45,13 @@ var editorPresets = [
                     if(this.getVar("#editor.moving")==true){
                         this.setVar("#x",this.engine.getObject(event.object).getVar("#x")-this.getVar("#editor.mx"));
                         this.setVar("#y",this.engine.getObject(event.object).getVar("#y")-this.getVar("#editor.my"));
-                        this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                        this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:this.getVar("#boundingBox").w,h:this.getVar("#boundingBox").h,z:this.getVar("#z")-1});
                         workspace.updateMoveToolbar();
                     }else{
                         if(workspace.currentTool=="delete"){
-                            this.engine.execute_event("showSelectBox",{type:"delete", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")+1});
+                            this.engine.execute_event("showSelectBox",{type:"delete", x:this.getVar("#x"),y:this.getVar("#y"),w:this.getVar("#boundingBox").w,h:this.getVar("#boundingBox").h,z:this.getVar("#z")+1});
                         }else{
-                            this.engine.execute_event("showSelectBox",{type:"hover", x:this.getVar("#x"),y:this.getVar("#y"),w:100,h:100,z:this.getVar("#z")-1});
+                            this.engine.execute_event("showSelectBox",{type:"hover", x:this.getVar("#x"),y:this.getVar("#y"),w:this.getVar("#boundingBox").w,h:this.getVar("#boundingBox").h,z:this.getVar("#z")-1});
                         }
                     }
                 }
@@ -58,7 +59,7 @@ var editorPresets = [
         }],
     collision: {
         "box": [
-            { "x": 0, "y": 0, "w":100, "h":100 }
+            {"#tag":"hitbox", "x": 0, "y": 0, "w":100, "h":100 }
         ]
     }
 },
@@ -72,13 +73,13 @@ var editorPresets = [
                                 var spritesheet=workspace.presetTable[type] || "objectWithNoSpritesheet";
                                 var that=this;
                                 setTimeout(function(){
-                                    that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{"#preset":type,"#spritesheet":spritesheet});
+                                    var boundingBox = that.engine.getAnimationEngine().getSpriteBox(spritesheet);
+                                    that.engine.addObjectLive("something", "object",that.engine.getObject(event.object).getVar("#x"), that.engine.getObject(event.object).getVar("#y"), 0, false,false,{"#preset":type,"#spritesheet":spritesheet,"#boundingBox":boundingBox});
                                     workspace.updateObjectList();
                                 },0);
                             }
                             if(workspace.currentTool=="moveCamera" && this.getVar("#editor.moving")!=true){
                                  this.setVar("#editor.moving",true);
-                                 console.log(1)
                                  this.setVar("mouse",this.engine.getObject(event.object));
                                  var camera=this.engine.getAnimationEngine().getCamera();
                                 this.setVar("#editor.mx",camera.x-this.engine.getObject(event.object).getVar("#x"));
@@ -102,7 +103,6 @@ var editorPresets = [
         name:"mouseup",code:function(event){
                             if(workspace.currentTool=="moveCamera" && this.getVar("#editor.moving")==true){
                                 this.setVar("#editor.moving",false);
-                                console.log(2)
                             }
                 
         }

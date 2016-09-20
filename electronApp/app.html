@@ -99,15 +99,18 @@
 							return;
 						break;
 						case "#---":
-							engineInstance.loadLevelByID("emptyLevel");
+							// engineInstance.loadLevelByID("emptyLevel");
 						break;
 						default:
-							engineInstance.loadLevelByID("emptyLevel");
-							vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
-								level.forEach(function(object){
-									engineInstance.addObjectLive(object.name, "object", object.x, object.y, object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet||"objectWithNoSpritesheet","#name":object.name});
-								})
-								workspace.updateObjectList();
+							engineInstance.loadLevelByID("emptyLevel",function(){
+								vscodeConnection.getLevelContent(workspace.getLevelFile(),x,function(level){
+									level.forEach(function(object){
+										var boundingBox = engineInstance.getAnimationEngine().getSpriteBox(object.spritesheet||"objectWithNoSpritesheet");
+										engineInstance.addObjectLive(object.name, "object", +object.x, +object.y, +object.z||0, false,false,{"#preset":object.type,"#spritesheet":object.spritesheet||"objectWithNoSpritesheet","#name":object.name,"#boundingBox":boundingBox});
+										// alert((object.spritesheet||"objectWithNoSpritesheet")+JSON.stringify(engineInstance.getAnimationEngine().getSpriteBox(object.spritesheet||"objectWithNoSpritesheet")));
+									})
+									workspace.updateObjectList();
+								});
 							});
 						break;
 					}
