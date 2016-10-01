@@ -17,29 +17,8 @@ var editorPresets = [
     },{
             name:"#collide",code:function(event){
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==1){
-                    if(workspace.currentTool=="move"&&this.getVar("#editor.moving")==false){
-                        
-                        if(this.engine.getEngineVar("justSelectedSomething")!=true){
-                            this.engine.setEngineVar("justSelectedSomething",true);
-                            this.engine.setEngineVar("lastObject", this);
-                            this.setVar("#editor.moving",true);
-                            this.setVar("#editor.mx",this.engine.getObject(event.object).getVar("#x")-this.getVar("#x"));
-                            this.setVar("#editor.my",this.engine.getObject(event.object).getVar("#y")-this.getVar("#y"));
-                            this.engine.execute_event("showSelectBox",{type:"select", x:this.getVar("#x"),y:this.getVar("#y"),w:this.getVar("#boundingBox").w,h:this.getVar("#boundingBox").h,z:this.getVar("#z")-1});
-                        }
-                    }else{
-                        this.engine.setEngineVar("justSelectedSomething",false);
-                        this.setVar("#editor.moving",false);
-                        this.engine.execute_event("hideSelectBox");
-                    }
-                    if(workspace.currentTool=="delete"){
-                        this.engine.deleteObjectLive(this);
-                        workspace.updateObjectList();
-                    }
-                    if(workspace.currentTool=="select"){
-                        this.engine.setEngineVar("lastObject", this);
-                        workspace.updateProperties();
-                    }
+                    this.engine.getEngineVar("selectedArray").push(this);
+                    this.engine.setEngineVar("mouse",event.object);
                 }
                 if(this.engine.getObject(event.object).instanceOf("basicMouse") && event.shape2id==0){
                     if(this.getVar("#editor.moving")==true){
@@ -162,6 +141,40 @@ var editorPresets = [
         {
             name:"hideSelectBox",code:function(event){
                    this.setVar("#state", "hide");
+            }
+        },
+        {
+            name:"#loop",code:function(event){
+                var selectedArray=this.engine.getEngineVar("selectedArray");
+                if( selectedArray && selectedArray.length>0 ){
+                    selectedArray.sort(function(a,b){
+                        return  b.getVar("#z") - a.getVar("#z");
+                    });
+                    var that=selectedArray[selectedArray.length-1];
+                    var mouse=this.engine.getEngineVar("mouse");
+                        if(workspace.currentTool=="move"&&that.getVar("#editor.moving")==false){
+                                this.engine.setEngineVar("lastObject", that);
+                                workspace.updateProperties();
+                                that.setVar("#editor.moving",true);
+                                that.setVar("#editor.mx",this.engine.getObject(mouse).getVar("#x")-that.getVar("#x"));
+                                that.setVar("#editor.my",this.engine.getObject(mouse).getVar("#y")-that.getVar("#y"));
+                                this.engine.execute_event("showSelectBox",{type:"select", x:that.getVar("#x"),y:that.getVar("#y"),w:that.getVar("#boundingBox").w,h:that.getVar("#boundingBox").h,z:that.getVar("#z")-1});
+                        }else{
+                            that.setVar("#editor.moving",false);
+                            this.engine.execute_event("hideSelectBox");
+                        }
+                        if(workspace.currentTool=="delete"){
+                            this.engine.deleteObjectLive(that);
+                            workspace.updateObjectList();
+                        }
+                        if(workspace.currentTool=="select"){
+                            this.engine.setEngineVar("lastObject", that);
+                            workspace.updateProperties();
+                        }
+
+                }
+                this.engine.setEngineVar("selectedArray",[]);
+
             }
         }]
 }
